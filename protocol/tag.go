@@ -15,6 +15,14 @@ const (
 	Float   = 0x04
 )
 
+// tag names
+const (
+	TagNickname = 0x01
+	TagVersion  = 0x11
+	TagPort     = 0x0F
+	TagFlags    = 0x20
+)
+
 // Tag is TLV-like (Type, Length, Value) structure which is used for appending optional data to eMule messages.
 type Tag interface {
 	Type() uint8

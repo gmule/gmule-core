@@ -123,16 +123,20 @@ func TestReadTag(t *testing.T) {
 		if err != nil {
 			t.Log(i, err)
 		}
-		if tag == nil || tc.out == nil {
-			if tag != tc.out {
-				t.Fail()
-			}
-			continue
-		}
-		if tag.Type() != tc.out.Type() || tag.Name() != tc.out.Name() || tag.Value() != tc.out.Value() {
+		if !tagEqual(tag, tc.out) {
 			t.Fail()
 		}
 	}
+}
+
+func tagEqual(t1, t2 Tag) bool {
+	if t1 == t2 {
+		return true
+	}
+	if t1 == nil || t2 == nil {
+		return false
+	}
+	return t1.Type() == t2.Type() && t1.Name() == t2.Name() && t1.Value() == t2.Value()
 }
 
 func TestTagEncode(t *testing.T) {
@@ -192,7 +196,7 @@ func TestTagDecode(t *testing.T) {
 		if err := tag.Decode(tc.in); err != nil {
 			t.Log(err)
 		}
-		if tag.Type() != tc.out.Type() || tag.Name() != tc.out.Name() || tag.Value() != tc.out.Value() {
+		if !tagEqual(tag, tc.out) {
 			t.Fail()
 		}
 	}
@@ -250,7 +254,7 @@ func TestIntegerTagDecode(t *testing.T) {
 		if err := tag.Decode(tc.in); err != nil {
 			t.Log(err)
 		}
-		if tag.Type() != tc.out.Type() || tag.Name() != tc.out.Name() || tag.Value() != tc.out.Value() {
+		if !tagEqual(tag, tc.out) {
 			t.Fail()
 		}
 	}
@@ -308,7 +312,7 @@ func TestFloatTagDecode(t *testing.T) {
 		if err := tag.Decode(tc.in); err != nil {
 			t.Log(err)
 		}
-		if tag.Type() != tc.out.Type() || tag.Name() != tc.out.Name() || tag.Value() != tc.out.Value() {
+		if !tagEqual(tag, tc.out) {
 			t.Fail()
 		}
 	}
@@ -362,7 +366,7 @@ func TestStringTagDecode(t *testing.T) {
 		if err := tag.Decode(tc.in); err != nil {
 			t.Log(err)
 		}
-		if tag.Type() != tc.out.Type() || tag.Name() != tc.out.Name() || tag.Value() != tc.out.Value() {
+		if !tagEqual(tag, tc.out) {
 			t.Fail()
 		}
 	}

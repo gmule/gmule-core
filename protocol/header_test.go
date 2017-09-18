@@ -47,7 +47,7 @@ func TestHeaderDecode(t *testing.T) {
 		if err := h.Decode(tc.in); err != nil {
 			t.Log(err)
 		}
-		if h.Protocol != tc.out.Protocol || h.Size != tc.out.Size || h.Type != tc.out.Type {
+		if h != tc.out {
 			t.Fail()
 		}
 	}
