@@ -17,9 +17,12 @@ const (
 
 // Header is the message header.
 type Header struct {
+	// Protocol ID, 0xE3 for eDonkey and 0xC5 for eMule.
 	Protocol uint8
-	Size     uint32
-	Type     uint8
+	// The size of the message in bytes not including the protocol and size fields.
+	Size uint32
+	// A unique message ID.
+	Type uint8
 }
 
 // Encode encodes the header to binary data.

@@ -1,19 +1,20 @@
 package protocol
 
 import (
-	"bytes"
+	"errors"
 	"io"
 
 	"github.com/satori/go.uuid"
 )
 
-// op-code
+// Message IDs
 const (
 	// Client Server TCP Messages
 	MessageLoginRequest      = 0x01
 	MessageServerMessage     = 0x38
 	MessageIDChange          = 0x40
 	MessageOfferFiles        = 0x15
+	MessageGetServerList     = 0x14
 	MessageServerStatus      = 0x34
 	MessageServerList        = 0x32
 	MessageServerIdent       = 0x41
@@ -29,10 +30,11 @@ const (
 
 // errors
 var (
-	ErrShortBuffer = io.ErrShortBuffer
+	ErrShortBuffer      = io.ErrShortBuffer
+	ErrWrongMessageType = errors.New("wrong message type")
 )
 
-// UID is user ID a 128 bit (16 byte) GUID.
+// UID is user ID, it is a 128 bit (16 byte) GUID.
 // the 6th and 15th (start from 1st) bytes values are 14 and 111 respectively.
 type UID [16]byte
 
@@ -47,11 +49,6 @@ func NewUID() (uid UID) {
 // Bytes returns a slice of 16-byte length.
 func (uid UID) Bytes() []byte {
 	return uid[:]
-}
-
-func (uid UID) IsNil() bool {
-	var zero UID
-	return bytes.Equal(uid[:], zero[:])
 }
 
 func (uid UID) String() string {

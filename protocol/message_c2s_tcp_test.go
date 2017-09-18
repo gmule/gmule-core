@@ -19,7 +19,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			&LoginMessage{},
 			[]byte{
 				0,           // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				0,                                              // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -35,7 +35,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			&LoginMessage{Header: Header{}},
 			[]byte{
 				0,           // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				0,                                              // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -51,7 +51,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			&LoginMessage{Header: Header{Protocol: EMule, Size: 1, Type: MessageLoginRequest}},
 			[]byte{
 				EMule,       // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -70,7 +70,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -91,7 +91,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -113,7 +113,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -136,7 +136,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -160,7 +160,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -185,7 +185,7 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -264,32 +264,32 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				16, 0, 0, 0, // size
+				17, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 16, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 17, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				20, 0, 0, 0, // size
+				21, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 20, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 21, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				22, 0, 0, 0, // size
+				23, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -297,13 +297,13 @@ func TestLoginMessageDecode(t *testing.T) {
 				0, 0, // port
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 22, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 23, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				26, 0, 0, 0, // size
+				27, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -312,14 +312,14 @@ func TestLoginMessageDecode(t *testing.T) {
 				0, 0, 0, 0, // tag count
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 26, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 27, Type: MessageLoginRequest},
 				UID:    uid,
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				32, 0, 0, 0, // size
+				33, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -328,13 +328,13 @@ func TestLoginMessageDecode(t *testing.T) {
 				String, 1, 0, TagNickname, 0, 0, // name tag
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 32, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 33, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				26, 0, 0, 0, // size
+				27, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -342,13 +342,13 @@ func TestLoginMessageDecode(t *testing.T) {
 				4, 0, 0, 0, // tag count
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 26, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 27, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				32, 0, 0, 0, // size
+				33, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -357,13 +357,13 @@ func TestLoginMessageDecode(t *testing.T) {
 				String, 1, 0, TagNickname, 0, 0, // name tag
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 32, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 33, Type: MessageLoginRequest},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				35, 0, 0, 0, // size
+				36, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -372,14 +372,14 @@ func TestLoginMessageDecode(t *testing.T) {
 				String, 1, 0, TagNickname, 3, 0, 'a', 'b', 'c', // name tag
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 35, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 36, Type: MessageLoginRequest},
 				Name:   "abc",
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				43, 0, 0, 0, // size
+				44, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -389,7 +389,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 			},
 			&LoginMessage{
-				Header:  Header{Protocol: EDonkey, Size: 43, Type: MessageLoginRequest},
+				Header:  Header{Protocol: EDonkey, Size: 44, Type: MessageLoginRequest},
 				Name:    "abc",
 				Version: 1,
 			},
@@ -397,7 +397,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				51, 0, 0, 0, // size
+				52, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -408,7 +408,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagPort, 1, 0, 0, 0, // port tag
 			},
 			&LoginMessage{
-				Header:  Header{Protocol: EDonkey, Size: 51, Type: MessageLoginRequest},
+				Header:  Header{Protocol: EDonkey, Size: 52, Type: MessageLoginRequest},
 				Name:    "abc",
 				Version: 1,
 			},
@@ -416,7 +416,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -428,7 +428,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 1, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header:  Header{Protocol: EDonkey, Size: 61, Type: MessageLoginRequest},
+				Header:  Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
 				Name:    "gmule",
 				Version: 1,
 				Flags:   1,
@@ -437,7 +437,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EMule,       // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -448,12 +448,12 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
-			&LoginMessage{Header: Header{Protocol: EMule, Size: 56, Type: MessageLoginRequest}},
+			&LoginMessage{Header: Header{Protocol: EMule, Size: 57, Type: MessageLoginRequest}},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -466,14 +466,14 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header: Header{Protocol: EDonkey, Size: 56, Type: MessageLoginRequest},
+				Header: Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
 				UID:    uid,
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -486,7 +486,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 56, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 			},
@@ -494,7 +494,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				56, 0, 0, 0, // size
+				57, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -507,7 +507,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 56, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
@@ -516,7 +516,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -529,7 +529,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 61, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
@@ -539,7 +539,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -552,7 +552,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 61, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
@@ -563,7 +563,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				61, 0, 0, 0, // size
+				62, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -576,7 +576,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 61, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
@@ -588,7 +588,7 @@ func TestLoginMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,     // protocol
-				69, 0, 0, 0, // size
+				70, 0, 0, 0, // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -602,7 +602,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Integer, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
-				Header:   Header{Protocol: EDonkey, Size: 69, Type: MessageLoginRequest},
+				Header:   Header{Protocol: EDonkey, Size: 70, Type: MessageLoginRequest},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
@@ -642,7 +642,7 @@ func TestServerMessageEncode(t *testing.T) {
 			&ServerMessage{},
 			[]byte{
 				0,          // protocol
-				2, 0, 0, 0, // size
+				3, 0, 0, 0, // size
 				0,    // type
 				0, 0, // size
 			},
@@ -653,7 +653,7 @@ func TestServerMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				0,          // protocol
-				5, 0, 0, 0, // size
+				6, 0, 0, 0, // size
 				0,    // type
 				3, 0, // size
 				'a', 'b', 'c', // messages
@@ -665,7 +665,7 @@ func TestServerMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,    // protocol
-				2, 0, 0, 0, // size
+				3, 0, 0, 0, // size
 				MessageServerMessage, // type
 				0, 0,                 // size
 			},
@@ -677,7 +677,7 @@ func TestServerMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				EDonkey,     // protocol
-				13, 0, 0, 0, // size
+				14, 0, 0, 0, // size
 				MessageServerMessage, // type
 				11, 0,                // size
 				'a', 'b', 'c', '\n', // messages
@@ -740,25 +740,49 @@ func TestServerMessageDecode(t *testing.T) {
 		{
 			[]byte{
 				EDonkey,    // protocol
-				2, 0, 0, 0, // size
+				3, 0, 0, 0, // size
 				MessageServerMessage, // type
 				0, 0,
 			},
 			&ServerMessage{
-				Header: Header{Protocol: EDonkey, Size: 2, Type: MessageServerMessage},
+				Header: Header{Protocol: EDonkey, Size: 3, Type: MessageServerMessage},
 			},
 		},
 		{
 			[]byte{
 				EDonkey,    // protocol
-				5, 0, 0, 0, // size
+				6, 0, 0, 0, // size
 				MessageServerMessage, // type
 				1, 0,
 				'a', 'b', 'c',
 			},
 			&ServerMessage{
-				Header:   Header{Protocol: EDonkey, Size: 5, Type: MessageServerMessage},
+				Header:   Header{Protocol: EDonkey, Size: 6, Type: MessageServerMessage},
 				Messages: "a",
+			},
+		},
+		{
+			[]byte{
+				EDonkey,    // protocol
+				7, 0, 0, 0, // size
+				MessageServerMessage, // type
+				3, 0,
+				'a', 'b', 'c',
+			},
+			&ServerMessage{
+				Header: Header{Protocol: EDonkey, Size: 7, Type: MessageServerMessage},
+			},
+		},
+		{
+			[]byte{
+				EDonkey,    // protocol
+				4, 0, 0, 0, // size
+				MessageServerMessage, // type
+				3, 0,
+				'a',
+			},
+			&ServerMessage{
+				Header: Header{Protocol: EDonkey, Size: 4, Type: MessageServerMessage},
 			},
 		},
 		{
@@ -770,45 +794,21 @@ func TestServerMessageDecode(t *testing.T) {
 				'a', 'b', 'c',
 			},
 			&ServerMessage{
-				Header: Header{Protocol: EDonkey, Size: 6, Type: MessageServerMessage},
-			},
-		},
-		{
-			[]byte{
-				EDonkey,    // protocol
-				3, 0, 0, 0, // size
-				MessageServerMessage, // type
-				3, 0,
-				'a',
-			},
-			&ServerMessage{
-				Header: Header{Protocol: EDonkey, Size: 3, Type: MessageServerMessage},
-			},
-		},
-		{
-			[]byte{
-				EDonkey,    // protocol
-				5, 0, 0, 0, // size
-				MessageServerMessage, // type
-				3, 0,
-				'a', 'b', 'c',
-			},
-			&ServerMessage{
-				Header:   Header{Protocol: EDonkey, Size: 5, Type: MessageServerMessage},
+				Header:   Header{Protocol: EDonkey, Size: 6, Type: MessageServerMessage},
 				Messages: "abc",
 			},
 		},
 		{
 			[]byte{
 				EDonkey,     // protocol
-				12, 0, 0, 0, // size
+				13, 0, 0, 0, // size
 				MessageServerMessage, // type
 				10, 0,
 				'a', 'b', 'c', '\r', '\n',
 				'd', 'e', 'f', '\r', '\n',
 			},
 			&ServerMessage{
-				Header:   Header{Protocol: EDonkey, Size: 12, Type: MessageServerMessage},
+				Header:   Header{Protocol: EDonkey, Size: 13, Type: MessageServerMessage},
 				Messages: "abc\r\ndef\r\n",
 			},
 		},
