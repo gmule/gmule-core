@@ -2,6 +2,8 @@ package protocol
 
 import (
 	"encoding/binary"
+	"errors"
+	"fmt"
 )
 
 // protocol ID
@@ -47,5 +49,12 @@ func (h *Header) Decode(data []byte) (err error) {
 	h.Size = binary.LittleEndian.Uint32(data[1:5])
 	h.Type = data[5]
 
+	if h.Protocol == 0 || h.Size == 0 || h.Type == 0 {
+		return errors.New("invalid message header")
+	}
 	return
+}
+
+func (h Header) String() string {
+	return fmt.Sprintf("protocol: %#x, size: %d, type: %#x", h.Protocol, h.Size, h.Type)
 }

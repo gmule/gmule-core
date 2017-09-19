@@ -3,29 +3,16 @@ package protocol
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
+	"strings"
 )
 
 // LoginMessage is the first message send by the client to the server after TCP connection establishment.
 type LoginMessage struct {
-	Header Header
-	UID    UID
-	// The client ID is an a 4 byte identifier provided by the server at their connection handshake.
-	// A client ID is valid only through the lifetime of a client-server TCP connection although in
-	// case the client has a high ID it will be assigned the same ID by all servers until its IP address changes.
-	//
-	// Client IDs are divided to low IDs and high IDs. The eMule server will typically
-	// assigns a client with a low ID when the client can’t accept incoming connections.
-	// Having a low ID restricts the client’s use of the eMule network and might result in the server’s rejecting the client’s connection.
-	//
-	// A high ID is given to clients that allow other clients to freely
-	// connect to eMule’s TCP port on their host machine (the default port number is 4662).
-	// A client with a high ID has no restrictions in its use of the eMule network.
-	//
-	// High IDs are calculated in the following way: assuming the host IP is X.Y.Z.W the ID will be
-	// X + 2^8 * Y + 2^16 * Z + 2^24 * W (big endian representation).
-	// A low ID is always lower than 16777216 (0x1000000).
+	message
+	UID      UID
 	ClientID uint32
 	// The TCP port used by the client, configurable.
 	Port uint16
@@ -43,7 +30,12 @@ func (m *LoginMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageLoginRequest
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -101,11 +93,13 @@ func (m *LoginMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageLoginRequest {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	pos := HeaderLength
-	if m.Header.Size == 0 ||
-		len(data) < pos+int(m.Header.Size)-1 ||
+	if len(data) < pos+int(m.Header.Size)-1 ||
 		len(data) < pos+16+4+2+4 {
 		return ErrShortBuffer
 	}
@@ -146,11 +140,20 @@ func (m *LoginMessage) Decode(data []byte) (err error) {
 	return
 }
 
+func (m LoginMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	fmt.Fprintf(&b, "uid: %s, clientID: %#x(%s), port: %d\n", m.UID, m.ClientID, ClientID(m.ClientID).String(), m.Port)
+	fmt.Fprintf(&b, "name: %s, version: %#x, flags: %#x", m.Name, m.Version, m.Flags)
+	return b.String()
+}
+
 // ServerMessage is variable length message that is sent from the server to client.
 // A single server-message may contain several messages separated by new line characters ('\r','\n' or both).
 // Messages that start with "server version", "warning", "error" and "emDynIP" have special meaning for the client.
 type ServerMessage struct {
-	Header Header
+	message
 	// A list of server messages separated by new lines.
 	Messages string
 }
@@ -162,7 +165,12 @@ func (m *ServerMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageServerMessage
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -190,11 +198,13 @@ func (m *ServerMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageServerMessage {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	pos := HeaderLength
-	if m.Header.Size == 0 ||
-		len(data) < pos+int(m.Header.Size)-1 ||
+	if len(data) < pos+int(m.Header.Size)-1 ||
 		len(data) < pos+2 {
 		return ErrShortBuffer
 	}
@@ -208,10 +218,18 @@ func (m *ServerMessage) Decode(data []byte) (err error) {
 	return
 }
 
+func (m *ServerMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	b.WriteString(m.Messages)
+	return b.String()
+}
+
 // IDChangeMessage is the message sent by the server as a response to the login request message and
 // signifies that the server has accepted the client connection.
 type IDChangeMessage struct {
-	Header   Header
+	message
 	ClientID uint32
 	// Currently only 1 bit (the LSB) has meaning, setting it to 1 signals that the server supports compression.
 	Bitmap uint32
@@ -224,7 +242,12 @@ func (m *IDChangeMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageIDChange
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -251,11 +274,13 @@ func (m *IDChangeMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageIDChange {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	pos := HeaderLength
-	if m.Header.Size == 0 ||
-		len(data) < pos+int(m.Header.Size)-1 ||
+	if len(data) < pos+int(m.Header.Size)-1 ||
 		len(data) < pos+8 {
 		return ErrShortBuffer
 	}
@@ -267,9 +292,17 @@ func (m *IDChangeMessage) Decode(data []byte) (err error) {
 	return
 }
 
+func (m *IDChangeMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	fmt.Fprintf(&b, "clientID: %#x(%s), bitmap: %#x", m.ClientID, ClientID(m.ClientID).String(), m.Bitmap)
+	return b.String()
+}
+
 // OfferFilesMessage is used by the client to describe local files available for other clients to download.
 type OfferFilesMessage struct {
-	Header Header
+	message
 	// The number of files described within, in any case no more than 200.
 	// The Server can also set a lower limit to this number.
 	FileCount uint32
@@ -278,7 +311,7 @@ type OfferFilesMessage struct {
 // GetServerListMessage is sent when the client is configured to expand its list of eMule servers by querying its current server.
 // This message may be sent from the client to the server immediately after a successful handshake completion.
 type GetServerListMessage struct {
-	Header Header
+	message
 }
 
 // Encode encodes the message to binary data.
@@ -288,7 +321,12 @@ func (m *GetServerListMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageGetServerList
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -308,15 +346,24 @@ func (m *GetServerListMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageGetServerList {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	return
 }
 
+func (m *GetServerListMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	return b.String()
+}
+
 // ServerListMessage is sent from the server to the client.
 // The message contains information about additional eMule servers to be used to expand the client’s server list.
 type ServerListMessage struct {
-	Header Header
+	message
 	// Server descriptor entries, each entry size is 6 bytes and contains 4 bytes IP address and then 2 byte TCP port.
 	Servers []*net.TCPAddr
 }
@@ -328,7 +375,12 @@ func (m *ServerListMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageServerList
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -361,11 +413,13 @@ func (m *ServerListMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageServerList {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	pos := HeaderLength
-	if m.Header.Size == 0 ||
-		len(data) < pos+int(m.Header.Size)-1 ||
+	if len(data) < pos+int(m.Header.Size)-1 ||
 		len(data) < pos+1 {
 		return ErrShortBuffer
 	}
@@ -387,11 +441,24 @@ func (m *ServerListMessage) Decode(data []byte) (err error) {
 	return
 }
 
+func (m *ServerListMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	b.WriteString("servers:\n")
+	var ss []string
+	for _, addr := range m.Servers {
+		ss = append(ss, addr.String())
+	}
+	b.WriteString(strings.Join(ss, ","))
+	return b.String()
+}
+
 // ServerStatusMessage is sent from the server to the client.
 // The message contains information on the current number of users and files on the server.
 // The information in this message is both stored by the client and also displayed to the user.
 type ServerStatusMessage struct {
-	Header Header
+	message
 	// The number of users currently logged in to the server.
 	UserCount uint32
 	// The number of files that this server is informed about.
@@ -405,7 +472,12 @@ func (m *ServerStatusMessage) Encode() (data []byte, err error) {
 	}
 	buf := new(bytes.Buffer)
 
-	b, err := m.Header.Encode()
+	header := m.Header
+	if header.Protocol == 0 {
+		header.Protocol = EDonkey
+	}
+	header.Type = MessageServerStatus
+	b, err := header.Encode()
 	if err != nil {
 		return
 	}
@@ -432,11 +504,13 @@ func (m *ServerStatusMessage) Decode(data []byte) (err error) {
 	if err != nil {
 		return
 	}
+	if header.Type != MessageServerStatus {
+		return ErrWrongMessageType
+	}
 	m.Header = header
 
 	pos := HeaderLength
-	if m.Header.Size == 0 ||
-		len(data) < pos+int(m.Header.Size)-1 ||
+	if len(data) < pos+int(m.Header.Size)-1 ||
 		len(data) < pos+8 {
 		return ErrShortBuffer
 	}
@@ -446,4 +520,12 @@ func (m *ServerStatusMessage) Decode(data []byte) (err error) {
 	m.FileCount = binary.LittleEndian.Uint32(data[pos : pos+4])
 
 	return
+}
+
+func (m *ServerStatusMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	fmt.Fprintf(&b, "users: %d, files: %d", m.UserCount, m.FileCount)
+	return b.String()
 }
