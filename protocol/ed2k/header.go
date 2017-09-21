@@ -1,20 +1,23 @@
-package protocol
+package ed2k
 
 import (
+	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
+	"io"
 )
 
 // protocol ID
 const (
-	EDonkey = 0xE3
-	EMule   = 0xC5
+	ProtoEDonkey = 0xE3
+	ProtoEMule   = 0xC5
+	ProtoPacked  = 0xD4
 )
 
 const (
 	// HeaderLength is the length of message header.
-	HeaderLength = 6
+	// 1-byte protocol + 4-byte data size
+	HeaderLength = 5
 )
 
 // Header is the message header.
@@ -23,19 +26,15 @@ type Header struct {
 	Protocol uint8
 	// The size of the message in bytes not including the protocol and size fields.
 	Size uint32
-	// A unique message ID.
-	Type uint8
 }
 
 // Encode encodes the header to binary data.
 func (h *Header) Encode() (data []byte, err error) {
-	data = make([]byte, HeaderLength)
-	if h == nil {
+	buf := new(bytes.Buffer)
+	if _, err = h.WriteTo(buf); err != nil {
 		return
 	}
-	data[0] = h.Protocol
-	data[5] = h.Type
-	binary.LittleEndian.PutUint32(data[1:5], h.Size)
+	data = buf.Bytes()
 	return
 }
 
@@ -47,14 +46,21 @@ func (h *Header) Decode(data []byte) (err error) {
 
 	h.Protocol = data[0]
 	h.Size = binary.LittleEndian.Uint32(data[1:5])
-	h.Type = data[5]
 
-	if h.Protocol == 0 || h.Size == 0 || h.Type == 0 {
-		return errors.New("invalid message header")
-	}
+	return
+}
+
+// WriteTo writes header struct to w. The return value n is the number of bytes written.
+func (h *Header) WriteTo(w io.Writer) (n int64, err error) {
+	data := make([]byte, HeaderLength)
+	data[0] = h.Protocol
+	binary.LittleEndian.PutUint32(data[1:5], h.Size)
+
+	size, err := w.Write(data)
+	n = int64(size)
 	return
 }
 
 func (h Header) String() string {
-	return fmt.Sprintf("protocol: %#x, size: %d, type: %#x", h.Protocol, h.Size, h.Type)
+	return fmt.Sprintf("protocol: %#x, size: %d", h.Protocol, h.Size)
 }

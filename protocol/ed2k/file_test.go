@@ -1,4 +1,4 @@
-package protocol
+package ed2k
 
 import (
 	"os"

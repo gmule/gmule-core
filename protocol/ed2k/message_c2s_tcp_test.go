@@ -1,4 +1,4 @@
-package protocol
+package ed2k
 
 import (
 	"bytes"
@@ -18,182 +18,194 @@ func TestLoginMessageEncode(t *testing.T) {
 		{
 			&LoginMessage{},
 			[]byte{
-				EDonkey,     // protocol
+				0,           // protocol
 				57, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
-				message: message{Header: Header{Protocol: EMule, Size: 1, Type: MessageLoginRequest}},
+				message: message{Header: Header{Protocol: ProtoEMule, Size: 1}},
 			},
 			[]byte{
-				EMule,       // protocol
+				ProtoEMule,  // protocol
 				57, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID: uid,
 			},
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 			},
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
 			},
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 0),
+					IntegerTag(TagPort, 4662),
+					IntegerTag(TagFlags, 0),
+				},
 			},
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
-				Version:  1,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagPort, 4662),
+					IntegerTag(TagFlags, 0),
+				},
 			},
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
-				Version:  1,
-				Flags:    0xFFFFFFFF,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagFlags, 0xFFFFFFFF),
+				},
 			},
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 		},
 	}
@@ -226,6 +238,13 @@ func TestLoginMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
+				ProtoEDonkey, // protocol
+				0, 0, 0, 0,   // size
+			},
+			&LoginMessage{},
+		},
+		{
+			[]byte{
 				0,          // protocol
 				0, 0, 0, 0, // size
 				0, // type
@@ -251,8 +270,8 @@ func TestLoginMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				0, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				0, 0, 0, 0,   // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 			},
@@ -260,66 +279,50 @@ func TestLoginMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				1, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				1, 0, 0, 0,   // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 			},
-			&LoginMessage{
-				message: message{
-					Header: Header{Protocol: EDonkey, Size: 1, Type: MessageLoginRequest},
-				},
-			},
+			&LoginMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				17, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				17, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 			},
-			&LoginMessage{
-				message: message{
-					Header: Header{Protocol: EDonkey, Size: 17, Type: MessageLoginRequest},
-				},
-			},
+			&LoginMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				21, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				21, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 			},
-			&LoginMessage{
-				message: message{
-					Header: Header{Protocol: EDonkey, Size: 21, Type: MessageLoginRequest},
-				},
-			},
+			&LoginMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				23, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				23, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 			},
-			&LoginMessage{
-				message: message{
-					Header: Header{Protocol: EDonkey, Size: 23, Type: MessageLoginRequest},
-				},
-			},
+			&LoginMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				27, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				27, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
@@ -329,32 +332,32 @@ func TestLoginMessageDecode(t *testing.T) {
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 27, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 27},
 				},
 				UID: uid,
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				33, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				33, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				0, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 33, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 33},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				27, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				27, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
@@ -363,169 +366,177 @@ func TestLoginMessageDecode(t *testing.T) {
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 27, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 27},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				33, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				33, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 33, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 33},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				36, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				36, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 3, 0, 'a', 'b', 'c', // name tag
+				TagString, 1, 0, TagName, 3, 0, 'a', 'b', 'c', // name tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 36, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 36},
 				},
-				Name: "abc",
+				Tags: []Tag{
+					StringTag(TagName, "abc", false),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				44, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				44, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 3, 0, 'a', 'b', 'c', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagString, 1, 0, TagName, 3, 0, 'a', 'b', 'c', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 44, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 44},
 				},
-				Name:    "abc",
-				Version: 1,
+				Tags: []Tag{
+					StringTag(TagName, "abc", false),
+					IntegerTag(TagVersion, 1),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				52, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				52, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 3, 0, 'a', 'b', 'c', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 1, 0, 0, 0, // port tag
+				TagString, 1, 0, TagName, 3, 0, 'a', 'b', 'c', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 1, 0, 0, 0, // port tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 52, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 52},
 				},
-				Name:    "abc",
-				Version: 1,
+				Tags: []Tag{
+					StringTag(TagName, "abc", false),
+					IntegerTag(TagVersion, 1),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 1, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 1, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 1, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 1, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 62},
 				},
-				Name:    "gmule",
-				Version: 1,
-				Flags:   1,
+				Tags: []Tag{
+					StringTag(TagName, "abc", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagFlags, 1),
+				},
 			},
 		},
 		{
 			[]byte{
-				EMule,       // protocol
+				ProtoEMule,  // protocol
 				57, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EMule, Size: 57, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEMule, Size: 57},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 57},
 				},
 				UID: uid,
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0, 0, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 57},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
@@ -533,22 +544,22 @@ func TestLoginMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				57, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 0, 0, // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 0, 0, // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 57, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 57},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
@@ -557,108 +568,124 @@ func TestLoginMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 62},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 0),
+					IntegerTag(TagPort, 4662),
+					IntegerTag(TagFlags, 0),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 62},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
-				Version:  1,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagPort, 4662),
+					IntegerTag(TagFlags, 0),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				62, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				62, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				4, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 62, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 62},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
-				Version:  1,
-				Flags:    0xFFFFFFFF,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagFlags, 0xFFFFFFFF),
+				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				70, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				70, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
 				5, 0, 0, 0, // tag count
-				String, 1, 0, TagNickname, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
-				Integer, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
-				Integer, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				Integer, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
-				Integer, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
+				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
+				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagInteger, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 70, Type: MessageLoginRequest},
+					Header: Header{Protocol: ProtoEDonkey, Size: 70},
 				},
 				UID:      uid,
 				ClientID: 0xFFFFFFFF,
 				Port:     4662,
-				Name:     "gmule",
-				Version:  1,
-				Flags:    0xFFFFFFFF,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					IntegerTag(TagVersion, 1),
+					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagFlags, 0xFFFFFFFF),
+					Uint32Tag(TagFlags, 0xFFFFFFFF),
+				},
 			},
 		},
 	}
@@ -672,10 +699,10 @@ func TestLoginMessageDecode(t *testing.T) {
 		if msg == tc.out {
 			continue
 		}
-		if msg == nil || tc.out == nil || *msg != *tc.out {
+		if msg == nil || tc.out == nil ||
+			msg.message != tc.out.message || msg.UID != tc.out.UID ||
+			msg.ClientID != tc.out.ClientID || msg.Port != tc.out.Port {
 			t.Fail()
-			t.Log(i, "failed")
-			t.Log(msg)
 		}
 	}
 }
@@ -691,7 +718,7 @@ func TestServerMessageEncode(t *testing.T) {
 		{
 			&ServerMessage{},
 			[]byte{
-				EDonkey,    // protocol
+				0,          // protocol
 				3, 0, 0, 0, // size
 				MessageServerMessage, // type
 				0, 0,                 // size
@@ -702,7 +729,7 @@ func TestServerMessageEncode(t *testing.T) {
 				Messages: "abc",
 			},
 			[]byte{
-				EDonkey,    // protocol
+				0,          // protocol
 				6, 0, 0, 0, // size
 				MessageServerMessage, // type
 				3, 0,                 // size
@@ -712,12 +739,12 @@ func TestServerMessageEncode(t *testing.T) {
 		{
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: 0xFF},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 			},
 			[]byte{
-				EDonkey,    // protocol
-				3, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				3, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				0, 0,                 // size
 			},
@@ -725,12 +752,12 @@ func TestServerMessageEncode(t *testing.T) {
 		{
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 			},
 			[]byte{
-				EDonkey,    // protocol
-				3, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				3, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				0, 0,                 // size
 			},
@@ -738,13 +765,13 @@ func TestServerMessageEncode(t *testing.T) {
 		{
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey},
 				},
 				Messages: "abc\ndef\nghi",
 			},
 			[]byte{
-				EDonkey,     // protocol
-				14, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				14, 0, 0, 0,  // size
 				MessageServerMessage, // type
 				11, 0,                // size
 				'a', 'b', 'c', '\n', // messages
@@ -780,6 +807,13 @@ func TestServerMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
+				ProtoEDonkey, // protocol
+				0, 0, 0, 0,   // size
+			},
+			&ServerMessage{},
+		},
+		{
+			[]byte{
 				0,          // protocol
 				0, 0, 0, 0, // size
 				0, // type
@@ -796,87 +830,83 @@ func TestServerMessageDecode(t *testing.T) {
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				0, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				0, 0, 0, 0,   // size
 				MessageServerMessage, // type
 			},
 			&ServerMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				3, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				3, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				0, 0,
 			},
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 3, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey, Size: 3},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				6, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				6, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				1, 0,
 				'a', 'b', 'c',
 			},
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 6, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey, Size: 6},
 				},
 				Messages: "a",
 			},
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				7, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				7, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				3, 0,
 				'a', 'b', 'c',
 			},
-			&ServerMessage{
-				message: message{
-					Header: Header{Protocol: EDonkey, Size: 7, Type: MessageServerMessage},
-				},
-			},
+			&ServerMessage{},
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				4, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				4, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				3, 0,
 				'a',
 			},
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 4, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey, Size: 4},
 				},
 			},
 		},
 		{
 			[]byte{
-				EDonkey,    // protocol
-				6, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				6, 0, 0, 0,   // size
 				MessageServerMessage, // type
 				3, 0,
 				'a', 'b', 'c',
 			},
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 6, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey, Size: 6},
 				},
 				Messages: "abc",
 			},
 		},
 		{
 			[]byte{
-				EDonkey,     // protocol
-				13, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				13, 0, 0, 0,  // size
 				MessageServerMessage, // type
 				10, 0,
 				'a', 'b', 'c', '\r', '\n',
@@ -884,7 +914,7 @@ func TestServerMessageDecode(t *testing.T) {
 			},
 			&ServerMessage{
 				message: message{
-					Header: Header{Protocol: EDonkey, Size: 13, Type: MessageServerMessage},
+					Header: Header{Protocol: ProtoEDonkey, Size: 13},
 				},
 				Messages: "abc\r\ndef\r\n",
 			},

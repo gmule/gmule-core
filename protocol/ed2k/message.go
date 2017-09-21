@@ -1,4 +1,4 @@
-package protocol
+package ed2k
 
 import (
 	"errors"
@@ -11,23 +11,22 @@ import (
 
 // Message IDs
 const (
-	// Client Server TCP Messages
+	// Client-Server TCP Messages
 	MessageLoginRequest      = 0x01
-	MessageServerMessage     = 0x38
-	MessageIDChange          = 0x40
-	MessageOfferFiles        = 0x15
+	MessageRejected          = 0x05
 	MessageGetServerList     = 0x14
-	MessageServerStatus      = 0x34
-	MessageServerList        = 0x32
-	MessageServerIdent       = 0x41
+	MessageOfferFiles        = 0x15
 	MessageSearchRequest     = 0x16
-	MessageSearchResult      = 0x16
 	MessageGetSources        = 0x19
-	MessageFoundSources      = 0x42
 	MessageCallbackRequest   = 0x1C
+	MessageServerList        = 0x32
+	MessageServerStatus      = 0x34
 	MessageCallbackRequested = 0x35
 	MessageCallbackFailed    = 0x36
-	MessageRejected          = 0x05
+	MessageServerMessage     = 0x38
+	MessageIDChange          = 0x40
+	MessageServerIdent       = 0x41
+	MessageFoundSources      = 0x42
 )
 
 // errors
@@ -40,10 +39,11 @@ var constructors = map[uint8]func() Message{
 	MessageLoginRequest:  func() Message { return &LoginMessage{} },
 	MessageServerMessage: func() Message { return &ServerMessage{} },
 	MessageIDChange:      func() Message { return &IDChangeMessage{} },
-	// MessageOfferFiles:    func() Message { return &OfferFilesMessage{} },
+	MessageOfferFiles:    func() Message { return &OfferFilesMessage{} },
 	MessageGetServerList: func() Message { return &GetServerListMessage{} },
-	MessageServerStatus:  func() Message { return &ServerStatusMessage{} },
 	MessageServerList:    func() Message { return &ServerStatusMessage{} },
+	MessageServerStatus:  func() Message { return &ServerStatusMessage{} },
+	MessageServerIdent:   func() Message { return &ServerIdentMessage{} },
 }
 
 // UID is user ID, it is a 128 bit (16 byte) GUID.
@@ -105,13 +105,9 @@ func (m *message) Protocol() uint8 {
 	return m.Header.Protocol
 }
 
-func (m *message) Type() uint8 {
-	return m.Header.Type
-}
-
 // ReadMessage reads structured binary data from r and parses the data to message.
 func ReadMessage(r io.Reader) (m Message, err error) {
-	data := make([]byte, 256)
+	data := make([]byte, 1500)
 	// read header
 	if _, err = io.ReadFull(r, data[:HeaderLength]); err != nil {
 		return
@@ -120,7 +116,7 @@ func ReadMessage(r io.Reader) (m Message, err error) {
 	if err = header.Decode(data[:HeaderLength]); err != nil {
 		return
 	}
-	mSize := HeaderLength + int(header.Size-1)
+	mSize := HeaderLength + int(header.Size)
 	if len(data) < mSize {
 		b := data
 		data = make([]byte, mSize)
@@ -130,9 +126,10 @@ func ReadMessage(r io.Reader) (m Message, err error) {
 		return
 	}
 
-	fn, ok := constructors[header.Type]
+	mType := data[5]
+	fn, ok := constructors[mType]
 	if !ok {
-		err = fmt.Errorf("unknown message type: %v", header.Type)
+		err = fmt.Errorf("unknown message type: %v", mType)
 	}
 
 	m = fn()
