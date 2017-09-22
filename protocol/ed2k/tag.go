@@ -10,14 +10,21 @@ import (
 
 // tag names
 const (
-	TagName    = 0x01
-	TagSize    = 0x02
-	TagType    = 0x03
-	TagFormat  = 0x04
-	TagDesc    = 0x0B
-	TagVersion = 0x11
-	TagPort    = 0x0F
-	TagFlags   = 0x20
+	TagName         = 0x01
+	TagSize         = 0x02
+	TagType         = 0x03
+	TagFormat       = 0x04
+	TagDesc         = 0x0B
+	TagVersion      = 0x11
+	TagPort         = 0x0F
+	TagServerFlags  = 0x20 // currently only used to inform a server about supported features.
+	TagEMuleVersion = 0xFB
+
+	// tag flags for internal usage
+
+	// This flag indicates that the flag name is just 1 byte without size field.
+	// The MSB of tag type will be turned on if set.
+	TagCompactNameFlag = 0x100
 )
 
 // Tag types
@@ -56,6 +63,12 @@ const (
 	TagStr16 = 0x20
 )
 
+// tag name type
+const (
+	TagStringName = 0
+	TagIntName    = 1
+)
+
 // Server capabilities, values for flags
 const (
 	CapZlib         = 0x0001
@@ -76,17 +89,19 @@ type Tag interface {
 	Value() interface{}
 	Encode() ([]byte, error)
 	Decode([]byte) error
+	ReadFrom(r io.Reader) (n int64, err error)
 	WriteTo(w io.Writer) (n int64, err error)
 }
 
 type tag struct {
-	types uint8
-	name  interface{}
-	value interface{}
+	tagType     uint8
+	name        interface{}
+	nameCompact bool
+	value       interface{}
 }
 
 func (t *tag) Type() uint8 {
-	return t.types
+	return t.tagType
 }
 
 func (t *tag) Name() interface{} {
@@ -102,54 +117,10 @@ func ReadTag(r io.Reader) (Tag, error) {
 	if r == nil {
 		return nil, io.EOF
 	}
-	b := make([]byte, 1024)
-	if _, err := io.ReadFull(r, b[:3]); err != nil {
-		return nil, err
-	}
+
 	tag := &tag{}
-	tag.types = b[0]
-	nlen := int(binary.LittleEndian.Uint16(b[1:3]))
-
-	if nlen > 0 {
-		if _, err := io.ReadFull(r, b[:nlen]); err != nil {
-			return nil, err
-		}
-		if nlen == 1 {
-			tag.name = int(b[0])
-		} else {
-			tag.name = string(b[:nlen])
-		}
-	} else {
-		tag.name = ""
-	}
-
-	switch tag.types {
-	case TagUint32:
-		var v uint32
-		if err := binary.Read(r, binary.LittleEndian, &v); err != nil {
-			return nil, err
-		}
-		tag.value = int32(v)
-	case TagFloat32:
-		var v float32
-		if err := binary.Read(r, binary.LittleEndian, &v); err != nil {
-			return nil, err
-		}
-		tag.value = v
-	case TagString:
-		var vlen uint16
-		if err := binary.Read(r, binary.LittleEndian, &vlen); err != nil {
-			return nil, err
-		}
-		tag.value = ""
-		if vlen > 0 {
-			if _, err := io.ReadFull(r, b[:int(vlen)]); err != nil {
-				return nil, err
-			}
-			tag.value = string(b[:int(vlen)])
-		}
-	default:
-		return nil, errors.New("invalid type")
+	if _, err := tag.ReadFrom(r); err != nil {
+		return nil, err
 	}
 	return tag, nil
 }
@@ -164,53 +135,143 @@ func (t *tag) Encode() (data []byte, err error) {
 }
 
 func (t *tag) Decode(data []byte) (err error) {
-	if len(data) < 4 {
-		return ErrShortBuffer
+	buf := bytes.NewReader(data)
+	_, err = t.ReadFrom(buf)
+	return
+}
+
+func (t *tag) ReadFrom(r io.Reader) (n int64, err error) {
+	var readSize int
+	b := make([]byte, 1024) // TODO: we should check buffer size when reading from r.
+	if _, err = io.ReadFull(r, b[:1]); err != nil {
+		return
 	}
-	t.types = data[0]
-	nlen := int(binary.LittleEndian.Uint16(data[1:]))
-	if nlen == 1 {
-		t.name = int(data[3])
+	t.tagType = b[0] & 0x7F
+	readSize++
+
+	nlen := 0
+	if b[0]&0x80 > 0 {
+		t.nameCompact = true
+		nlen = 1
 	} else {
-		if len(data) < 3+nlen {
-			return ErrShortBuffer
+		if _, err = io.ReadFull(r, b[1:3]); err != nil {
+			return
 		}
-		t.name = string(data[3 : 3+nlen])
-	}
-	pos := 3 + nlen
-	switch t.types {
-	case TagUint32:
-		if len(data) < pos+4 {
-			return ErrShortBuffer
-		}
-		t.value = int32(binary.LittleEndian.Uint32(data[pos : pos+4]))
-	case TagFloat32:
-		if len(data) < pos+4 {
-			return ErrShortBuffer
-		}
-		var value float32
-		err = binary.Read(bytes.NewReader(data[pos:pos+4]), binary.LittleEndian, &value)
-		t.value = value
-	case TagString:
-		if len(data) < pos+2 {
-			return ErrShortBuffer
-		}
-		vlen := binary.LittleEndian.Uint16(data[pos : pos+2])
-		pos += 2
-		if len(data) < pos+int(vlen) {
-			return ErrShortBuffer
-		}
-		t.value = string(data[pos : pos+int(vlen)])
-	default:
-		return errors.New("invalid type")
+		nlen = int(binary.LittleEndian.Uint16(b[1:3]))
+		readSize += 2
 	}
 
+	if nlen > 0 {
+		if _, err = io.ReadFull(r, b[:nlen]); err != nil {
+			return
+		}
+		if nlen == 1 {
+			t.name = int(b[0])
+		} else {
+			t.name = string(b[:nlen])
+		}
+		readSize += nlen
+	} else {
+		t.name = ""
+	}
+
+	switch t.tagType {
+	case TagBool:
+		var v uint8
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = false
+		if v > 0 {
+			t.value = true
+		}
+		readSize++
+
+	case TagUint8:
+		var v uint8
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = v
+		readSize++
+
+	case TagUint16:
+		var v uint16
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = v
+		readSize += 2
+
+	case TagInteger, TagUint32:
+		var v uint32
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = v
+		readSize += 4
+
+	case TagUint64:
+		var v uint64
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = v
+		readSize += 8
+
+	case TagFloat, TagFloat32:
+		var v float32
+		if err = binary.Read(r, binary.LittleEndian, &v); err != nil {
+			return
+		}
+		t.value = v
+		readSize += 4
+
+	case TagString:
+		var vlen uint16
+		if err = binary.Read(r, binary.LittleEndian, &vlen); err != nil {
+			return
+		}
+		readSize += 2
+
+		t.value = ""
+		if vlen > 0 {
+			if _, err = io.ReadFull(r, b[:int(vlen)]); err != nil {
+				return
+			}
+			t.value = string(b[:int(vlen)])
+		}
+		readSize += int(vlen)
+
+	case TagStr1, TagStr2, TagStr3, TagStr4, TagStr5, TagStr6, TagStr7, TagStr8,
+		TagStr9, TagStr10, TagStr11, TagStr12, TagStr13, TagStr14, TagStr15, TagStr16:
+		vlen := int(t.tagType - TagStr0)
+		if _, err = io.ReadFull(r, b[:vlen]); err != nil {
+			return
+		}
+		t.value = string(b[:vlen])
+		readSize += vlen
+
+	case TagHash16:
+		vlen := 16
+		if _, err = io.ReadFull(r, b[:vlen]); err != nil {
+			return
+		}
+		t.value = b[:vlen]
+		readSize += vlen
+
+	default:
+		err = errors.New("invalid type")
+		return
+	}
+
+	n = int64(readSize)
 	return
 }
 
 func (t *tag) WriteTo(w io.Writer) (n int64, err error) {
 	size := 0
-	if _, err = w.Write([]byte{t.types}); err != nil {
+	if _, err = w.Write([]byte{t.tagType}); err != nil {
 		return
 	}
 	size++
@@ -226,10 +287,17 @@ func (t *tag) WriteTo(w io.Writer) (n int64, err error) {
 
 	switch v := t.name.(type) {
 	case int:
-		if _, err = w.Write([]byte{0x01, 0x00, uint8(v)}); err != nil {
+		var b []byte
+		if t.nameCompact {
+			b = []byte{uint8(v & 0x7F)}
+		} else {
+			b = []byte{0x01, 0x00, uint8(v & 0x7F)}
+		}
+		if _, err = w.Write(b); err != nil {
 			return
 		}
-		size += 3
+		size += len(b)
+
 	case string:
 		nlen := len(v)
 		if err = binary.Write(w, binary.LittleEndian, uint16(nlen)); err != nil {
@@ -240,34 +308,80 @@ func (t *tag) WriteTo(w io.Writer) (n int64, err error) {
 			return
 		}
 		size += nlen
+
 	default:
 		err = fmt.Errorf("invalid name: %v", t.name)
 		return
 	}
 
-	switch t.types {
-	case TagUint32, TagFloat32:
-		if err = binary.Write(w, binary.LittleEndian, t.value); err != nil {
+	switch t.tagType {
+	case TagBool:
+		v, _ := t.value.(bool)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
+			return
+		}
+		size++
+
+	case TagUint8:
+		v, _ := t.value.(uint8)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
+			return
+		}
+		size++
+
+	case TagUint16:
+		v, _ := t.value.(uint16)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
+			return
+		}
+		size += 2
+
+	case TagInteger, TagUint32:
+		v, _ := t.value.(uint32)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
 			return
 		}
 		size += 4
-	case TagString:
-		v, ok := t.value.(string)
-		if !ok {
-			err = errors.New("value type invalid, expect string")
+
+	case TagUint64:
+		v, _ := t.value.(uint64)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
 			return
 		}
+		size += 8
+
+	case TagFloat, TagFloat32:
+		v, _ := t.value.(float32)
+		if err = binary.Write(w, binary.LittleEndian, v); err != nil {
+			return
+		}
+		size += 4
+
+	case TagString:
+		v, _ := t.value.(string)
 		vlen := len(v)
 		if err = binary.Write(w, binary.LittleEndian, uint16(vlen)); err != nil {
 			return
 		}
 		size += 2
-		if _, err = w.Write([]byte(v)); err != nil {
+		if vlen > 0 {
+			if _, err = w.Write([]byte(v)); err != nil {
+				return
+			}
+		}
+		size += vlen
+
+	case TagStr1, TagStr2: //TODO:
+	case TagHash16:
+		v, _ := t.value.([16]byte)
+		vlen := len(v)
+		if _, err = w.Write(v[:]); err != nil {
 			return
 		}
 		size += vlen
+
 	default:
-		err = fmt.Errorf("invalid tag type: %v", t.types)
+		err = fmt.Errorf("invalid tag type: %v", t.tagType)
 		return
 	}
 
@@ -284,59 +398,9 @@ func StringTag(name interface{}, value string, compress bool) Tag {
 	}
 
 	return &tag{
-		types: uint8(types),
-		name:  name,
-		value: value,
-	}
-}
-
-// IntegerTag is a tag with int32 integer value.
-// the type of name must be int or string.
-func IntegerTag(name interface{}, value int32) Tag {
-	return &tag{
-		types: TagInteger,
-		name:  name,
-		value: uint32(value),
-	}
-}
-
-// Uint32Tag is a tag with uint32 integer value.
-// the type of name must be int or string.
-func Uint32Tag(name interface{}, value uint32) Tag {
-	return &tag{
-		types: TagUint32,
-		name:  name,
-		value: value,
-	}
-}
-
-// Uint64Tag is a tag with uint64 integer value.
-// the type of name must be int or string.
-func Uint64Tag(name interface{}, value uint64) Tag {
-	return &tag{
-		types: TagUint64,
-		name:  name,
-		value: value,
-	}
-}
-
-// Uint16Tag is a tag with uint16 integer value.
-// the type of name must be int or string.
-func Uint16Tag(name interface{}, value uint16) Tag {
-	return &tag{
-		types: TagUint16,
-		name:  name,
-		value: value,
-	}
-}
-
-// Uint8Tag is a tag with uint8 integer value.
-// the type of name must be int or string.
-func Uint8Tag(name interface{}, value uint8) Tag {
-	return &tag{
-		types: TagUint8,
-		name:  name,
-		value: value,
+		tagType: uint8(types),
+		name:    name,
+		value:   value,
 	}
 }
 
@@ -344,9 +408,59 @@ func Uint8Tag(name interface{}, value uint8) Tag {
 // the type of name must be int or string.
 func BoolTag(name interface{}, value bool) Tag {
 	return &tag{
-		types: TagBool,
-		name:  name,
-		value: value,
+		tagType: TagBool,
+		name:    name,
+		value:   value,
+	}
+}
+
+// Uint8Tag is a tag with uint8 integer value.
+// the type of name must be int or string.
+func Uint8Tag(name interface{}, value uint8) Tag {
+	return &tag{
+		tagType: TagUint8,
+		name:    name,
+		value:   value,
+	}
+}
+
+// Uint16Tag is a tag with uint16 integer value.
+// the type of name must be int or string.
+func Uint16Tag(name interface{}, value uint16) Tag {
+	return &tag{
+		tagType: TagUint16,
+		name:    name,
+		value:   value,
+	}
+}
+
+// IntegerTag is a tag with int32 integer value.
+// the type of name must be int or string.
+func IntegerTag(name interface{}, value int32) Tag {
+	return &tag{
+		tagType: TagInteger,
+		name:    name,
+		value:   uint32(value),
+	}
+}
+
+// Uint32Tag is a tag with uint32 integer value.
+// the type of name must be int or string.
+func Uint32Tag(name interface{}, value uint32) Tag {
+	return &tag{
+		tagType: TagUint32,
+		name:    name,
+		value:   value,
+	}
+}
+
+// Uint64Tag is a tag with uint64 integer value.
+// the type of name must be int or string.
+func Uint64Tag(name interface{}, value uint64) Tag {
+	return &tag{
+		tagType: TagUint64,
+		name:    name,
+		value:   value,
 	}
 }
 
@@ -354,9 +468,9 @@ func BoolTag(name interface{}, value bool) Tag {
 // the type of name must be int or string.
 func FloatTag(name interface{}, value float32) Tag {
 	return &tag{
-		types: TagFloat32,
-		name:  name,
-		value: value,
+		tagType: TagFloat32,
+		name:    name,
+		value:   value,
 	}
 }
 
@@ -364,8 +478,18 @@ func FloatTag(name interface{}, value float32) Tag {
 // the type of name must be int or string.
 func Float32Tag(name interface{}, value float32) Tag {
 	return &tag{
-		types: TagFloat32,
-		name:  name,
-		value: value,
+		tagType: TagFloat32,
+		name:    name,
+		value:   value,
+	}
+}
+
+// Hash16Tag is a tag with 16-byte hash value.
+// the type of name must be int or string.
+func Hash16Tag(name interface{}, value [16]byte) Tag {
+	return &tag{
+		tagType: TagHash16,
+		name:    name,
+		value:   value[:],
 	}
 }
