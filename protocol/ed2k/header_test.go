@@ -35,9 +35,9 @@ func TestHeaderDecode(t *testing.T) {
 	}{
 		{nil, Header{}},
 		{[]byte{ProtoEDonkey, 0, 0, 0, 0}, Header{Protocol: ProtoEDonkey}},
-		{[]byte{0, 0, 0, 0, 0}, Header{}},
+		{[]byte{0, 0, 0, 0, 0}, Header{Protocol: ProtoEDonkey}},
+		{[]byte{0xFF, 0, 0, 0, 0}, Header{}},
 		{[]byte{ProtoEDonkey, 0, 0, 0, 0}, Header{Protocol: ProtoEDonkey}},
-		{[]byte{ProtoEDonkey, 1, 0, 0, 0}, Header{Protocol: ProtoEDonkey, Size: 1}},
 		{[]byte{ProtoEDonkey, 1, 0, 0, 0}, Header{Protocol: ProtoEDonkey, Size: 1}},
 		{[]byte{ProtoEMule, 1, 0, 0, 0}, Header{Protocol: ProtoEMule, Size: 1}},
 	}

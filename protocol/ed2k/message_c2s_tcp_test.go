@@ -28,7 +28,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -46,7 +46,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -68,7 +68,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -91,7 +91,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -115,7 +115,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -130,7 +130,7 @@ func TestLoginMessageEncode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 0),
 					IntegerTag(TagPort, 4662),
-					IntegerTag(TagFlags, 0),
+					IntegerTag(TagServerFlags, 0),
 				},
 			},
 			[]byte{
@@ -145,7 +145,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -160,7 +160,7 @@ func TestLoginMessageEncode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 1),
 					IntegerTag(TagPort, 4662),
-					IntegerTag(TagFlags, 0),
+					IntegerTag(TagServerFlags, 0),
 				},
 			},
 			[]byte{
@@ -175,7 +175,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 		},
 		{
@@ -190,7 +190,7 @@ func TestLoginMessageEncode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 1),
 					IntegerTag(TagPort, 4662),
-					Uint32Tag(TagFlags, 0xFFFFFFFF),
+					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},
 			},
 			[]byte{
@@ -205,7 +205,7 @@ func TestLoginMessageEncode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 		},
 	}
@@ -464,7 +464,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 1, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 1, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 1, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -473,7 +473,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				Tags: []Tag{
 					StringTag(TagName, "abc", false),
 					IntegerTag(TagVersion, 1),
-					IntegerTag(TagFlags, 1),
+					IntegerTag(TagServerFlags, 1),
 				},
 			},
 		},
@@ -489,7 +489,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -510,7 +510,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -532,7 +532,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -555,7 +555,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 0, 0, // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -579,7 +579,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -592,7 +592,7 @@ func TestLoginMessageDecode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 0),
 					IntegerTag(TagPort, 4662),
-					IntegerTag(TagFlags, 0),
+					IntegerTag(TagServerFlags, 0),
 				},
 			},
 		},
@@ -609,7 +609,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0, 0, 0, 0, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -622,7 +622,7 @@ func TestLoginMessageDecode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 1),
 					IntegerTag(TagPort, 4662),
-					IntegerTag(TagFlags, 0),
+					IntegerTag(TagServerFlags, 0),
 				},
 			},
 		},
@@ -639,7 +639,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
 				message: message{
@@ -652,7 +652,7 @@ func TestLoginMessageDecode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 1),
 					IntegerTag(TagPort, 4662),
-					Uint32Tag(TagFlags, 0xFFFFFFFF),
+					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},
 			},
 		},
@@ -669,7 +669,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
 				TagInteger, 1, 0, TagVersion, 1, 0, 0, 0, // version tag
 				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
+				TagInteger, 1, 0, TagServerFlags, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 				TagInteger, 1, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // flags tag
 			},
 			&LoginMessage{
@@ -683,8 +683,8 @@ func TestLoginMessageDecode(t *testing.T) {
 					StringTag(TagName, "gmule", false),
 					IntegerTag(TagVersion, 1),
 					IntegerTag(TagPort, 4662),
-					Uint32Tag(TagFlags, 0xFFFFFFFF),
-					Uint32Tag(TagFlags, 0xFFFFFFFF),
+					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
+					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},
 			},
 		},

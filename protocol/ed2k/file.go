@@ -5,8 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
-	"strconv"
 
 	"golang.org/x/crypto/md4"
 )
@@ -18,13 +16,14 @@ const (
 
 // FileHash is a 128 bit GUID hash calculated by the client and based on the file's contents.
 type FileHash struct {
+	Size     int64
 	Hash     []byte
 	PartHash [][]byte
 }
 
 func (h FileHash) String() string {
 	b := bytes.Buffer{}
-	fmt.Fprintf(&b, "hash: %X\n", h.Hash)
+	fmt.Fprintf(&b, "size: %d, hash: %X\n", h.Size, h.Hash)
 	b.WriteString("part hash:\n")
 	for i, hash := range h.PartHash {
 		fmt.Fprintf(&b, "%d - %X\n", i, hash)
@@ -64,6 +63,7 @@ func Hash(r io.Reader) (hash *FileHash, err error) {
 	}
 
 	hash = &FileHash{
+		Size:     size,
 		PartHash: partHash,
 	}
 	if len(partHash) > 0 {
@@ -89,21 +89,8 @@ type File struct {
 	ClientID uint32
 	// The Client’s TCP port or zero in case the client has low ID.
 	Port uint16
-	// Mandatory, The filename.
-	Name string
-	// Mandatory, The file size in bytes.
-	Size uint32
-	// Optional, the file type. One of the following:
-	// 'Audio', 'Video', 'Image', 'Pro' or 'Doc'.
-	Type string
-	// Optional, the file extension converted to lower case.
-	Format string
-	// Optional, in case the file is mp3, the song play time.
-	Length uint32
-	// Optional, in case the file is mp3, the encoding bitrate.
-	Bitrate uint32
-	// Optional, never sent, in case the file is a movie - the codec used to encode it.
-	Codec string
+	// File tags: name, size, type, etc.
+	Tags []Tag
 }
 
 // ReadFile reads structured binary data from r and parses the data to file.
@@ -165,95 +152,42 @@ func (f *File) readTag(r io.Reader, count int) error {
 		if err != nil {
 			return err
 		}
-		switch v := tag.Name().(type) {
-		case int:
-			switch v {
-			case TagName:
-				f.Name, _ = tag.Value().(string)
-			case TagSize:
-				size, _ := tag.Value().(int32)
-				f.Size = uint32(size)
-			case TagType:
-				f.Type, _ = tag.Value().(string)
-			case TagFormat:
-				f.Format, _ = tag.Value().(string)
-			default:
-				log.Println("unknown tag name:", v)
-			}
-		case string:
-			switch v {
-			case "length":
-				s, _ := tag.Value().(string)
-				length, _ := strconv.ParseInt(s, 10, 32)
-				f.Length = uint32(length)
-			case "bitrate":
-				bitrate, _ := tag.Value().(int32)
-				f.Bitrate = uint32(bitrate)
-			case "codec":
-				f.Codec, _ = tag.Value().(string)
-			default:
-				log.Println("unknown tag name:", v)
-			}
-		}
+		f.Tags = append(f.Tags, tag)
 	}
 	return nil
 }
 
 // WriteTo writes file struct to w. The return value n is the number of bytes written.
 func (f *File) WriteTo(w io.Writer) (n int64, err error) {
-	size, err := w.Write(f.Hash[:])
+	nn, err := w.Write(f.Hash[:])
+	n += int64(nn)
 	if err != nil {
 		return
 	}
 	if err = binary.Write(w, binary.LittleEndian, f.ClientID); err != nil {
 		return
 	}
-	size += 4
+	n += 4
 
 	if err = binary.Write(w, binary.LittleEndian, f.Port); err != nil {
 		return
 	}
-	size += 2
-
-	var tags []Tag
-	tags = append(tags,
-		StringTag(TagName, f.Name, false),
-		IntegerTag(TagSize, int32(f.Size)),
-	)
-	if f.Type != "" {
-		tags = append(tags, StringTag(TagType, f.Type, false))
-	}
-	if f.Format != "" {
-		tags = append(tags, StringTag(TagFormat, f.Format, false))
-	}
-	if f.Length > 0 {
-		tags = append(tags, StringTag("length", strconv.Itoa(int(f.Length)), false))
-	}
-	if f.Bitrate > 0 {
-		tags = append(tags, IntegerTag("bitrate", int32(f.Bitrate)))
-	}
-	if f.Codec != "" {
-		tags = append(tags, StringTag("codec", f.Codec, false))
-	}
+	n += 2
 
 	// tag count
-	if err = binary.Write(w, binary.LittleEndian, uint32(len(tags))); err != nil {
+	if err = binary.Write(w, binary.LittleEndian, uint32(len(f.Tags))); err != nil {
 		return
 	}
-	size += 4
+	n += 4
 
-	for _, tag := range tags {
-		b, er := tag.Encode()
+	for _, tag := range f.Tags {
+		nn, er := tag.WriteTo(w)
+		n += nn
 		if er != nil {
 			err = er
 			return
 		}
-		if _, err = w.Write(b); err != nil {
-			return
-		}
-		size += len(b)
 	}
 
-	n = int64(size)
 	return
 }

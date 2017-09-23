@@ -1,6 +1,8 @@
 package ed2k
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
@@ -11,6 +13,8 @@ import (
 
 // Message IDs
 const (
+	MessageNull = 0x00
+
 	// Client-Server TCP Messages
 	MessageLoginRequest      = 0x01
 	MessageRejected          = 0x05
@@ -41,7 +45,7 @@ var constructors = map[uint8]func() Message{
 	MessageIDChange:      func() Message { return &IDChangeMessage{} },
 	MessageOfferFiles:    func() Message { return &OfferFilesMessage{} },
 	MessageGetServerList: func() Message { return &GetServerListMessage{} },
-	MessageServerList:    func() Message { return &ServerStatusMessage{} },
+	MessageServerList:    func() Message { return &ServerListMessage{} },
 	MessageServerStatus:  func() Message { return &ServerStatusMessage{} },
 	MessageServerIdent:   func() Message { return &ServerIdentMessage{} },
 }
@@ -105,9 +109,51 @@ func (m *message) Protocol() uint8 {
 	return m.Header.Protocol
 }
 
+// NullMessage is a message that it is size field of header is 0.
+type NullMessage struct {
+	message
+}
+
+// Encode encodes the message to binary data.
+func (m *NullMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageNull)
+
+	data = buf.Bytes()
+	binary.LittleEndian.PutUint32(data[1:5], 0) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *NullMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+
+	m.Header = header
+	return
+}
+
+// Type is the message type
+func (m NullMessage) Type() uint8 {
+	return MessageNull
+}
+
+func (m NullMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[null]\n")
+	b.WriteString(m.Header.String())
+	return b.String()
+}
+
 // ReadMessage reads structured binary data from r and parses the data to message.
 func ReadMessage(r io.Reader) (m Message, err error) {
-	data := make([]byte, 1500)
+	data := make([]byte, 256)
 	// read header
 	if _, err = io.ReadFull(r, data[:HeaderLength]); err != nil {
 		return
@@ -116,6 +162,11 @@ func ReadMessage(r io.Reader) (m Message, err error) {
 	if err = header.Decode(data[:HeaderLength]); err != nil {
 		return
 	}
+
+	if header.Size == 0 {
+		return &NullMessage{message: message{Header: header}}, nil
+	}
+
 	mSize := HeaderLength + int(header.Size)
 	if len(data) < mSize {
 		b := data
@@ -130,6 +181,7 @@ func ReadMessage(r io.Reader) (m Message, err error) {
 	fn, ok := constructors[mType]
 	if !ok {
 		err = fmt.Errorf("unknown message type: %v", mType)
+		return
 	}
 
 	m = fn()

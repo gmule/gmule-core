@@ -41,14 +41,6 @@ func (m *LoginMessage) Encode() (data []byte, err error) {
 		return
 	}
 
-	/*
-		tags := []Tag{
-			StringTag(TagName, m.Name),
-			IntegerTag(TagVersion, int32(m.Version)),
-			IntegerTag(TagPort, int32(m.Port)),
-			IntegerTag(TagFlags, int32(m.Flags)),
-		}
-	*/
 	for _, tag := range m.Tags {
 		if _, err = tag.WriteTo(buf); err != nil {
 			return
@@ -99,22 +91,6 @@ func (m *LoginMessage) Decode(data []byte) (err error) {
 			return err
 		}
 		m.Tags = append(m.Tags, tag)
-		/*
-			name, _ := tag.Name().(int)
-			switch name {
-			case TagName:
-				m.Name, _ = tag.Value().(string)
-			case TagVersion:
-				v, _ := tag.Value().(int32)
-				m.Version = uint32(v)
-			case TagPort:
-			case TagFlags:
-				flags, _ := tag.Value().(int32)
-				m.Flags = uint32(flags)
-			default:
-				log.Println("unknown tag name:", name)
-			}
-		*/
 	}
 	return
 }
@@ -205,7 +181,7 @@ func (m ServerMessage) Type() uint8 {
 
 func (m ServerMessage) String() string {
 	b := bytes.Buffer{}
-	b.WriteString("[server message]\n")
+	b.WriteString("[server-message]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
 	b.WriteString(m.Messages)
@@ -277,7 +253,7 @@ func (m IDChangeMessage) Type() uint8 {
 
 func (m IDChangeMessage) String() string {
 	b := bytes.Buffer{}
-	b.WriteString("[id change]\n")
+	b.WriteString("[id-change]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
 	fmt.Fprintf(&b, "clientID: %#x(%s), bitmap: %#x", m.ClientID, ClientID(m.ClientID).String(), m.Bitmap)
@@ -358,12 +334,15 @@ func (m OfferFilesMessage) Type() uint8 {
 
 func (m OfferFilesMessage) String() string {
 	b := bytes.Buffer{}
-	b.WriteString("[offer files]\n")
+	b.WriteString("[offer-files]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\nfiles:\n")
 	for i, file := range m.Files {
-		fmt.Fprintf(&b, "%d - name: %s, size: %d, hash: %X\n",
-			i, file.Name, file.Size, file.Hash)
+		fmt.Fprintf(&b, "file%d - %X %s:%d\n", i, file.Hash, ClientID(file.ClientID).String(), file.Port)
+		for j, tag := range file.Tags {
+			fmt.Fprintf(&b, "tag%d - %v: %v\n", j, tag.Name(), tag.Value())
+		}
+
 	}
 	return b.String()
 }
@@ -653,7 +632,7 @@ func (m *ServerIdentMessage) Decode(data []byte) (err error) {
 		len(data) < pos+29 {
 		return ErrShortBuffer
 	}
-	if data[5] != MessageServerStatus {
+	if data[5] != MessageServerIdent {
 		return ErrWrongMessageType
 	}
 	m.Header = header

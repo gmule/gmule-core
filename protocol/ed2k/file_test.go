@@ -6,7 +6,7 @@ import (
 )
 
 func TestHash(t *testing.T) {
-	f, err := os.Open("/home/gerry/Downloads/amdgpu-pro-16.40-348864.tar.xz")
+	f, err := os.Open("/home/gerry/Downloads/test_file")
 	if err != nil {
 		t.Log(err)
 		return

@@ -148,18 +148,19 @@ func TestTagEncode(t *testing.T) {
 		{&tag{name: 1}, nil},
 		{&tag{value: 0.1}, nil},
 		{&tag{name: 1, value: 1}, nil},
-		{&tag{types: 1, name: 1, value: 1}, nil},
-		{&tag{types: TagInteger, name: 1, value: 1}, nil},
-		{&tag{types: TagInteger, name: 1, value: int32(0)}, []byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}},
-		{&tag{types: TagString, name: 0, value: 1}, nil},
+		{&tag{tagType: 1, name: 1, value: [16]byte{}}, []byte{TagHash16, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+		{&tag{tagType: TagInteger, name: 1, value: 1}, []byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}},
+		{&tag{tagType: TagInteger, name: 1, value: uint32(1)}, []byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}},
+		{&tag{tagType: TagString, name: 0, value: 1}, []byte{TagString, 1, 0, 0, 0, 0}},
 	}
 
-	for _, tc := range testCases {
+	for i, tc := range testCases {
 		b, err := tc.in.Encode()
 		if err != nil {
-			t.Log(err)
+			t.Log(i, err)
 		}
 		if !bytes.Equal(b, tc.out) {
+			t.Log(i, "failed")
 			t.Fail()
 		}
 	}
@@ -174,29 +175,30 @@ func TestTagDecode(t *testing.T) {
 		{[]byte{}, &tag{}},
 		{[]byte{0}, &tag{}},
 		{[]byte{0, 0}, &tag{}},
-		{[]byte{0, 0, 0}, &tag{}},
+		{[]byte{0, 0, 0}, &tag{name: ""}},
 		{[]byte{0, 0, 0, 0}, &tag{name: ""}},
-		{[]byte{0xFF, 0, 0, 0, 0}, &tag{types: 0xFF, name: ""}},
-		{[]byte{TagInteger}, &tag{}},
-		{[]byte{TagInteger, 0}, &tag{}},
-		{[]byte{TagInteger, 0, 0}, &tag{}},
-		{[]byte{TagInteger, 0, 0, 0}, &tag{types: TagInteger, name: ""}},
-		{[]byte{TagInteger, 2, 0, 0}, &tag{types: TagInteger}},
-		{[]byte{TagInteger, 1, 0, 1}, &tag{types: TagInteger, name: 1}},
-		{[]byte{TagFloat, 0, 0, 0}, &tag{types: TagFloat, name: ""}},
-		{[]byte{TagFloat, 2, 0, 0}, &tag{types: TagFloat}},
-		{[]byte{TagFloat, 1, 0, 1}, &tag{types: TagFloat, name: 1}},
-		{[]byte{TagString, 0, 0, 0}, &tag{types: TagString, name: ""}},
-		{[]byte{TagString, 0, 0, 1, 0}, &tag{types: TagString, name: ""}},
-		{[]byte{TagString, 0, 0, 0, 0}, &tag{types: TagString, name: "", value: ""}},
+		{[]byte{0xFF, 0, 0, 0, 0}, &tag{tagType: 0x7F, name: 0x0100}},
+		{[]byte{TagInteger}, &tag{tagType: TagInteger}},
+		{[]byte{TagInteger, 0}, &tag{tagType: TagInteger}},
+		{[]byte{TagInteger, 0, 0}, &tag{tagType: TagInteger, name: ""}},
+		{[]byte{TagInteger, 0, 0, 0}, &tag{tagType: TagInteger, name: ""}},
+		{[]byte{TagInteger, 2, 0, 0}, &tag{tagType: TagInteger}},
+		{[]byte{TagInteger, 1, 0, 1}, &tag{tagType: TagInteger, name: 1}},
+		{[]byte{TagFloat, 0, 0, 0}, &tag{tagType: TagFloat, name: ""}},
+		{[]byte{TagFloat, 2, 0, 0}, &tag{tagType: TagFloat}},
+		{[]byte{TagFloat, 1, 0, 1}, &tag{tagType: TagFloat, name: 1}},
+		{[]byte{TagString, 0, 0, 0}, &tag{tagType: TagString, name: ""}},
+		{[]byte{TagString, 0, 0, 1, 0}, &tag{tagType: TagString, name: "", value: ""}},
+		{[]byte{TagString, 0, 0, 0, 0}, &tag{tagType: TagString, name: "", value: ""}},
 	}
 
-	for _, tc := range testCases {
+	for i, tc := range testCases {
 		tag := &tag{}
 		if err := tag.Decode(tc.in); err != nil {
-			t.Log(err)
+			t.Log(i, err)
 		}
 		if !tagEqual(tag, tc.out) {
+			t.Log(i, "failed")
 			t.Fail()
 		}
 	}
