@@ -674,6 +674,132 @@ func (m ServerIdentMessage) String() string {
 	return b.String()
 }
 
+// SearchRequestMessage message is used to search for files by a user's search string.
+// The search string may include the boolean conditions 'AND', 'OR', 'NOT'.
+// The user may specify required file type and size and also set an availability
+// threshold (e.g. show me results that are available from at least 5 other clients).
 type SearchRequestMessage struct {
 	message
+	Searcher FileSearcher
+}
+
+// Encode encodes the message to binary data.
+func (m *SearchRequestMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageSearchRequest)
+
+	b, err := m.Searcher.Encode()
+	if err != nil {
+		return
+	}
+	buf.Write(b)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *SearchRequestMessage) Decode(data []byte) (err error) {
+	// TODO: decode
+	return nil
+}
+
+// Type is the message type
+func (m *SearchRequestMessage) Type() uint8 {
+	return MessageSearchRequest
+}
+
+func (m *SearchRequestMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[search-request]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	fmt.Fprint(&b, m.Searcher)
+	return b.String()
+}
+
+// SearchResultMessage is a message sent from the server to the client as a reply to a search request.
+// The message is usually compressed.
+type SearchResultMessage struct {
+	message
+	Files []File
+}
+
+// Encode encodes the message to binary data.
+func (m *SearchResultMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageSearchResult)
+
+	if err = binary.Write(buf, binary.LittleEndian, uint32(len(m.Files))); err != nil {
+		return
+	}
+
+	for _, file := range m.Files {
+		if _, err = file.WriteTo(buf); err != nil {
+			return
+		}
+	}
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *SearchResultMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+5 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageSearchResult {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	pos++
+	fileCount := binary.LittleEndian.Uint32(data[pos : pos+4])
+	pos += 4
+	r := bytes.NewReader(data[pos:])
+	for i := 0; i < int(fileCount); i++ {
+		file, err := ReadFile(r)
+		if err != nil {
+			return err
+		}
+		m.Files = append(m.Files, *file)
+	}
+	return
+}
+
+// Type is the message type
+func (m SearchResultMessage) Type() uint8 {
+	return MessageSearchResult
+}
+
+func (m SearchResultMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[search-result]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\nfiles:\n")
+	for i, file := range m.Files {
+		fmt.Fprintf(&b, "file%d - %X %s:%d\n", i, file.Hash, ClientID(file.ClientID).String(), file.Port)
+		for j, tag := range file.Tags {
+			fmt.Fprintf(&b, "tag%d - %v: %v\n", j, tag.Name(), tag.Value())
+		}
+
+	}
+	return b.String()
 }

@@ -3,6 +3,7 @@ package ed2k
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 
@@ -12,6 +13,52 @@ import (
 const (
 	// FileChunkSize is the size of file chunk.
 	FileChunkSize = 9728000
+
+	// MaxFileSize is the maximum file size in byte (2^38 = 256GB).
+	MaxFileSize = 2 << 37
+)
+
+// ed2k search expression comparison operators.
+// kad operators used to be different, but are the same since eMule 0.47a.
+const (
+	SearchEqual        = iota // eserver 16.45+
+	SearchGreater             // dserver
+	SearchLess                // dserver
+	SearchGreaterEqual        // eserver 16.45+
+	SearchLessEqual           // eserver 16.45+
+	SearchNotEqual
+)
+
+// File media types.
+const (
+	FileAudio    = "Audio"
+	FileVideo    = "Video"
+	FileImage    = "Image"
+	FileDocument = "Doc"
+	FileProgram  = "Pro"
+	FileArchive  = "Arc" // *Mule internal use only
+	FileCDImage  = "Iso" // *Mule internal use only
+)
+
+// Search operators.
+const (
+	SearchAND = iota
+	SearchOR
+	SearchNOT
+)
+
+// file search types.
+const (
+	SearchBoolean  = 0x00
+	SearchName     = 0x01
+	SearchMetadata = 0x02
+	SearchLimit    = 0x3
+)
+
+// Limit types
+const (
+	LimitMin = 0x01
+	LimitMax = 0x02
 )
 
 // FileHash is a 128 bit GUID hash calculated by the client and based on the file's contents.
@@ -190,4 +237,38 @@ func (f *File) WriteTo(w io.Writer) (n int64, err error) {
 	}
 
 	return
+}
+
+// FileSearcher is a file search struct.
+type FileSearcher interface {
+	Encode() (data []byte, err error)
+}
+
+type fileNameSearcher struct {
+	Name string
+}
+
+func (s *fileNameSearcher) Encode() (data []byte, err error) {
+	if s == nil || s.Name == "" {
+		err = errors.New("empty searcher")
+		return
+	}
+	data = make([]byte, 3+len(s.Name))
+	data[0] = SearchName
+	binary.LittleEndian.PutUint16(data[1:3], uint16(len(s.Name)))
+	copy(data[3:], s.Name)
+
+	return
+}
+
+func (s *fileNameSearcher) String() string {
+	if s == nil {
+		return ""
+	}
+	return fmt.Sprintf("by name: %s", s.Name)
+}
+
+// FileNameSearcher is a file searcher by file name.
+func FileNameSearcher(name string) FileSearcher {
+	return &fileNameSearcher{Name: name}
 }

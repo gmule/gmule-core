@@ -62,6 +62,14 @@ const (
 	TagStr14 = 0x1E
 	TagStr15 = 0x1F
 	TagStr16 = 0x20
+
+	// Additional media meta data tags from eDonkeyHybrid (note also the uppercase/lowercase)
+	FileMediaArtist  = "Artist"
+	FileMediaAlbum   = "Album"
+	FileMediaTitle   = "Title"
+	FileMediaLength  = "length"
+	FileMediaBitrate = "bitrate"
+	FileMediaCodec   = "codec"
 )
 
 // tag name type

@@ -21,9 +21,14 @@ const (
 	MessageGetServerList     = 0x14
 	MessageOfferFiles        = 0x15
 	MessageSearchRequest     = 0x16
+	MessageDisconnect        = 0x18
+	MessageSearchUser        = 0x1A
 	MessageGetSources        = 0x19
+	MessageGetSourcesOBFU    = 0x23
 	MessageCallbackRequest   = 0x1C
+	MessageMoreResult        = 0x21
 	MessageServerList        = 0x32
+	MessageSearchResult      = 0x33
 	MessageServerStatus      = 0x34
 	MessageCallbackRequested = 0x35
 	MessageCallbackFailed    = 0x36
@@ -31,6 +36,8 @@ const (
 	MessageIDChange          = 0x40
 	MessageServerIdent       = 0x41
 	MessageFoundSources      = 0x42
+	MessageUserList          = 0x43
+	MessageFoundSourcesOBFU  = 0x44
 )
 
 // errors
@@ -48,6 +55,8 @@ var constructors = map[uint8]func() Message{
 	MessageServerList:    func() Message { return &ServerListMessage{} },
 	MessageServerStatus:  func() Message { return &ServerStatusMessage{} },
 	MessageServerIdent:   func() Message { return &ServerIdentMessage{} },
+	MessageSearchRequest: func() Message { return &SearchRequestMessage{} },
+	MessageSearchResult:  func() Message { return &SearchResultMessage{} },
 }
 
 // UID is user ID, it is a 128 bit (16 byte) GUID.
