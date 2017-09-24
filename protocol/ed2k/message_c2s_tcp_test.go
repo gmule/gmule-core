@@ -18,17 +18,13 @@ func TestLoginMessageEncode(t *testing.T) {
 		{
 			&LoginMessage{},
 			[]byte{
-				0,           // protocol
-				57, 0, 0, 0, // size
+				ProtoEDonkey, // protocol
+				27, 0, 0, 0,  // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
-				4, 0, 0, 0, // tag count
-				TagString, 1, 0, TagName, 0, 0, // name tag
-				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
+				0, 0, 0, 0, // tag count
 			},
 		},
 		{
@@ -37,16 +33,12 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				ProtoEMule,  // protocol
-				57, 0, 0, 0, // size
+				27, 0, 0, 0, // size
 				MessageLoginRequest,                            // type
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
-				4, 0, 0, 0, // tag count
-				TagString, 1, 0, TagName, 0, 0, // name tag
-				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
+				0, 0, 0, 0, // tag count
 			},
 		},
 		{
@@ -58,17 +50,13 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				ProtoEDonkey, // protocol
-				57, 0, 0, 0,  // size
+				27, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0, 0, 0, 0, // client ID
 				0, 0, // port
-				4, 0, 0, 0, // tag count
-				TagString, 1, 0, TagName, 0, 0, // name tag
-				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
+				0, 0, 0, 0, // tag count
 			},
 		},
 		{
@@ -81,17 +69,13 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				ProtoEDonkey, // protocol
-				57, 0, 0, 0,  // size
+				27, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0, 0, // port
-				4, 0, 0, 0, // tag count
-				TagString, 1, 0, TagName, 0, 0, // name tag
-				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				TagInteger, 1, 0, TagPort, 0, 0, 0, 0, // port tag
-				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
+				0, 0, 0, 0, // tag count
 			},
 		},
 		{
@@ -105,17 +89,13 @@ func TestLoginMessageEncode(t *testing.T) {
 			},
 			[]byte{
 				ProtoEDonkey, // protocol
-				57, 0, 0, 0,  // size
+				27, 0, 0, 0,  // size
 				MessageLoginRequest, // type
 				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
 				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
 				0xFF, 0xFF, 0xFF, 0xFF, // client ID
 				0x36, 0x12, // port
-				4, 0, 0, 0, // tag count
-				TagString, 1, 0, TagName, 0, 0, // name tag
-				TagInteger, 1, 0, TagVersion, 0, 0, 0, 0, // version tag
-				TagInteger, 1, 0, TagPort, 0x36, 0x12, 0, 0, // port tag
-				TagInteger, 1, 0, TagServerFlags, 0, 0, 0, 0, // flags tag
+				0, 0, 0, 0, // tag count
 			},
 		},
 		{
@@ -128,9 +108,33 @@ func TestLoginMessageEncode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 0),
-					IntegerTag(TagPort, 4662),
-					IntegerTag(TagServerFlags, 0),
+				},
+			},
+			[]byte{
+				ProtoEDonkey, // protocol
+				38, 0, 0, 0,  // size
+				MessageLoginRequest, // type
+				uid[0], uid[1], uid[2], uid[3], uid[4], uid[5], uid[6], uid[7],
+				uid[8], uid[9], uid[10], uid[11], uid[12], uid[13], uid[14], uid[15], // user hash
+				0xFF, 0xFF, 0xFF, 0xFF, // client ID
+				0x36, 0x12, // port
+				1, 0, 0, 0, // tag count
+				TagString, 1, 0, TagName, 5, 0, 'g', 'm', 'u', 'l', 'e', // name tag
+			},
+		},
+		{
+			&LoginMessage{
+				message: message{
+					Header: Header{Protocol: ProtoEDonkey},
+				},
+				UID:      uid,
+				ClientID: 0xFFFFFFFF,
+				Port:     4662,
+				Tags: []Tag{
+					StringTag(TagName, "gmule", false),
+					Uint32Tag(TagVersion, 0),
+					Uint32Tag(TagPort, 4662),
+					Uint32Tag(TagServerFlags, 0),
 				},
 			},
 			[]byte{
@@ -158,9 +162,9 @@ func TestLoginMessageEncode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagPort, 4662),
-					IntegerTag(TagServerFlags, 0),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagPort, 4662),
+					Uint32Tag(TagServerFlags, 0),
 				},
 			},
 			[]byte{
@@ -188,8 +192,8 @@ func TestLoginMessageEncode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagPort, 4662),
 					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},
 			},
@@ -425,7 +429,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				},
 				Tags: []Tag{
 					StringTag(TagName, "abc", false),
-					IntegerTag(TagVersion, 1),
+					Uint32Tag(TagVersion, 1),
 				},
 			},
 		},
@@ -448,7 +452,7 @@ func TestLoginMessageDecode(t *testing.T) {
 				},
 				Tags: []Tag{
 					StringTag(TagName, "abc", false),
-					IntegerTag(TagVersion, 1),
+					Uint32Tag(TagVersion, 1),
 				},
 			},
 		},
@@ -472,8 +476,8 @@ func TestLoginMessageDecode(t *testing.T) {
 				},
 				Tags: []Tag{
 					StringTag(TagName, "abc", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagServerFlags, 1),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagServerFlags, 1),
 				},
 			},
 		},
@@ -590,9 +594,9 @@ func TestLoginMessageDecode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 0),
-					IntegerTag(TagPort, 4662),
-					IntegerTag(TagServerFlags, 0),
+					Uint32Tag(TagVersion, 0),
+					Uint32Tag(TagPort, 4662),
+					Uint32Tag(TagServerFlags, 0),
 				},
 			},
 		},
@@ -620,9 +624,9 @@ func TestLoginMessageDecode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagPort, 4662),
-					IntegerTag(TagServerFlags, 0),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagPort, 4662),
+					Uint32Tag(TagServerFlags, 0),
 				},
 			},
 		},
@@ -650,8 +654,8 @@ func TestLoginMessageDecode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagPort, 4662),
 					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},
 			},
@@ -681,8 +685,8 @@ func TestLoginMessageDecode(t *testing.T) {
 				Port:     4662,
 				Tags: []Tag{
 					StringTag(TagName, "gmule", false),
-					IntegerTag(TagVersion, 1),
-					IntegerTag(TagPort, 4662),
+					Uint32Tag(TagVersion, 1),
+					Uint32Tag(TagPort, 4662),
 					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 					Uint32Tag(TagServerFlags, 0xFFFFFFFF),
 				},

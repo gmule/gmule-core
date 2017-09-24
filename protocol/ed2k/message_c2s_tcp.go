@@ -1,3 +1,5 @@
+// Client Server TCP Messages
+
 package ed2k
 
 import (
@@ -30,16 +32,9 @@ func (m *LoginMessage) Encode() (data []byte, err error) {
 	buf.WriteByte(MessageLoginRequest)
 	buf.Write(m.UID.Bytes())
 
-	if err = binary.Write(buf, binary.LittleEndian, m.ClientID); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, m.Port); err != nil {
-		return
-	}
-
-	if err = binary.Write(buf, binary.LittleEndian, uint32(len(m.Tags))); err != nil {
-		return
-	}
+	binary.Write(buf, binary.LittleEndian, m.ClientID)
+	binary.Write(buf, binary.LittleEndian, m.Port)
+	binary.Write(buf, binary.LittleEndian, uint32(len(m.Tags)))
 
 	for _, tag := range m.Tags {
 		if _, err = tag.WriteTo(buf); err != nil {
@@ -134,12 +129,8 @@ func (m *ServerMessage) Encode() (data []byte, err error) {
 	buf.WriteByte(MessageServerMessage)
 
 	size := len(m.Messages)
-	if err = binary.Write(buf, binary.LittleEndian, uint16(size)); err != nil {
-		return
-	}
-	if _, err = buf.WriteString(m.Messages); err != nil {
-		return
-	}
+	binary.Write(buf, binary.LittleEndian, uint16(size))
+	buf.WriteString(m.Messages)
 
 	data = buf.Bytes()
 	size = len(data) - HeaderLength
@@ -188,7 +179,7 @@ func (m ServerMessage) String() string {
 	return b.String()
 }
 
-// IDChangeMessage is the message sent by the server as a response to the login request message and
+// IDChangeMessage message is sent by the server as a response to the login request message and
 // signifies that the server has accepted the client connection.
 type IDChangeMessage struct {
 	message
@@ -208,12 +199,8 @@ func (m *IDChangeMessage) Encode() (data []byte, err error) {
 	}
 	buf.WriteByte(MessageIDChange)
 
-	if err = binary.Write(buf, binary.LittleEndian, m.ClientID); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, m.Bitmap); err != nil {
-		return
-	}
+	binary.Write(buf, binary.LittleEndian, m.ClientID)
+	binary.Write(buf, binary.LittleEndian, m.Bitmap)
 
 	data = buf.Bytes()
 	size := len(data) - HeaderLength
@@ -280,10 +267,8 @@ func (m *OfferFilesMessage) Encode() (data []byte, err error) {
 		return
 	}
 	buf.WriteByte(MessageOfferFiles)
+	binary.Write(buf, binary.LittleEndian, uint32(len(m.Files)))
 
-	if err = binary.Write(buf, binary.LittleEndian, uint32(len(m.Files))); err != nil {
-		return
-	}
 	for _, file := range m.Files {
 		if _, err = file.WriteTo(buf); err != nil {
 			return
@@ -347,7 +332,7 @@ func (m OfferFilesMessage) String() string {
 	return b.String()
 }
 
-// GetServerListMessage is sent when the client is configured to expand its list of eMule servers by querying its current server.
+// GetServerListMessage message is sent when the client is configured to expand its list of eMule servers by querying its current server.
 // This message may be sent from the client to the server immediately after a successful handshake completion.
 type GetServerListMessage struct {
 	message
@@ -403,8 +388,8 @@ func (m GetServerListMessage) String() string {
 	return b.String()
 }
 
-// ServerListMessage is sent from the server to the client.
-// The message contains information about additional eMule servers to be used to expand the client’s server list.
+// ServerListMessage message sent from the server to the client
+// contains information about additional eMule servers to be used to expand the client’s server list.
 type ServerListMessage struct {
 	message
 	// Server descriptor entries, each entry size is 6 bytes and contains 4 bytes IP address and then 2 byte TCP port.
@@ -495,8 +480,8 @@ func (m ServerListMessage) String() string {
 	return b.String()
 }
 
-// ServerStatusMessage is sent from the server to the client.
-// The message contains information on the current number of users and files on the server.
+// ServerStatusMessage message sent from the server to the client
+// contains information on the current number of users and files on the server.
 // The information in this message is both stored by the client and also displayed to the user.
 type ServerStatusMessage struct {
 	message
@@ -516,13 +501,8 @@ func (m *ServerStatusMessage) Encode() (data []byte, err error) {
 		return
 	}
 	buf.WriteByte(MessageServerStatus)
-
-	if err = binary.Write(buf, binary.LittleEndian, m.UserCount); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, m.FileCount); err != nil {
-		return
-	}
+	binary.Write(buf, binary.LittleEndian, m.UserCount)
+	binary.Write(buf, binary.LittleEndian, m.FileCount)
 
 	data = buf.Bytes()
 	size := len(data) - HeaderLength
@@ -570,8 +550,8 @@ func (m ServerStatusMessage) String() string {
 	return b.String()
 }
 
-// ServerIdentMessage is a message sent from the server to the client.
-// Contains a server hash,the server IP address and
+// ServerIdentMessage message sent from the server to the client
+// contains a server hash, the server IP address and
 // TCP port (which may be useful when connecting through a proxy) and also server description information.
 type ServerIdentMessage struct {
 	message
@@ -595,18 +575,10 @@ func (m *ServerIdentMessage) Encode() (data []byte, err error) {
 		return
 	}
 	buf.WriteByte(MessageServerIdent)
-	if _, err = buf.Write(m.Hash[:]); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, m.IP); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, m.Port); err != nil {
-		return
-	}
-	if err = binary.Write(buf, binary.LittleEndian, uint32(len(m.Tags))); err != nil {
-		return
-	}
+	buf.Write(m.Hash[:])
+	binary.Write(buf, binary.LittleEndian, m.IP)
+	binary.Write(buf, binary.LittleEndian, m.Port)
+	binary.Write(buf, binary.LittleEndian, uint32(len(m.Tags)))
 	for _, tag := range m.Tags {
 		if _, err = tag.WriteTo(buf); err != nil {
 			return
@@ -667,7 +639,7 @@ func (m ServerIdentMessage) String() string {
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
 	fmt.Fprintf(&b, "addr: %s:%d, hash: %X\n",
-		net.IPv4(byte(m.IP&0xFF), byte((m.IP>>8)&0xFF), byte((m.IP>>16)&0xFF), byte((m.IP>>24)&0xFF)).String(), m.Port, m.Hash)
+		ClientID(m.IP).String(), m.Port, m.Hash)
 	for i, tag := range m.Tags {
 		fmt.Fprintf(&b, "tag%d - %v: %v\n", i, tag.Name(), tag.Value())
 	}
@@ -723,7 +695,7 @@ func (m *SearchRequestMessage) String() string {
 	return b.String()
 }
 
-// SearchResultMessage is a message sent from the server to the client as a reply to a search request.
+// SearchResultMessage message sent from the server to the client as a reply to a search request.
 // The message is usually compressed.
 type SearchResultMessage struct {
 	message
@@ -737,10 +709,7 @@ func (m *SearchResultMessage) Encode() (data []byte, err error) {
 		return
 	}
 	buf.WriteByte(MessageSearchResult)
-
-	if err = binary.Write(buf, binary.LittleEndian, uint32(len(m.Files))); err != nil {
-		return
-	}
+	binary.Write(buf, binary.LittleEndian, uint32(len(m.Files)))
 
 	for _, file := range m.Files {
 		if _, err = file.WriteTo(buf); err != nil {
@@ -801,5 +770,379 @@ func (m SearchResultMessage) String() string {
 		}
 
 	}
+	return b.String()
+}
+
+// GetSourcesMessage message sent from the client to the server requesting sources (other clients) for a file.
+type GetSourcesMessage struct {
+	message
+	Hash [16]byte
+	Size uint32
+}
+
+// Encode encodes the message to binary data.
+func (m *GetSourcesMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageGetSources)
+	buf.Write(m.Hash[:])
+	binary.Write(buf, binary.LittleEndian, m.Size)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *GetSourcesMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+21 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageGetSources {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	pos++
+
+	copy(m.Hash[:], data[pos:pos+16])
+	pos += 16
+	m.Size = binary.LittleEndian.Uint32(data[pos : pos+4])
+
+	return
+}
+
+// Type is the message type
+func (m GetSourcesMessage) Type() uint8 {
+	return MessageGetSources
+}
+
+func (m GetSourcesMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[get-sources]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\n")
+	fmt.Fprintf(&b, "hash: %X, size: %d", m.Hash, m.Size)
+	return b.String()
+}
+
+// FoundSourcesMessage message sent from the server to the client with sources (other clients) for a file requested by the client for a file.
+type FoundSourcesMessage struct {
+	message
+	Hash    [16]byte
+	Sources []*net.TCPAddr
+}
+
+// Encode encodes the message to binary data.
+func (m *FoundSourcesMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageFoundSources)
+	buf.Write(m.Hash[:])
+	binary.Write(buf, binary.LittleEndian, uint32(len(m.Sources)))
+
+	for _, source := range m.Sources {
+		if source == nil {
+			source = &net.TCPAddr{
+				IP:   net.IPv4zero,
+				Port: 0,
+			}
+		}
+		buf.Write(source.IP.To4())
+		binary.Write(buf, binary.LittleEndian, uint16(source.Port))
+	}
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *FoundSourcesMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+18 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageFoundSources {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	pos++
+
+	copy(m.Hash[:], data[pos:pos+16])
+	pos += 16
+
+	count := int(data[pos])
+	pos++
+	if len(data) < pos+count*6 {
+		return ErrShortBuffer
+	}
+
+	for i := 0; i < count; i++ {
+		m.Sources = append(m.Sources,
+			&net.TCPAddr{
+				IP:   net.IP(data[pos : pos+4]),
+				Port: int(binary.LittleEndian.Uint16(data[pos+4 : pos+6])),
+			})
+		pos += 6
+	}
+
+	return
+}
+
+// Type is the message type
+func (m FoundSourcesMessage) Type() uint8 {
+	return MessageFoundSources
+}
+
+func (m FoundSourcesMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[found-sources]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\nsources:\n")
+	var ss []string
+	for _, src := range m.Sources {
+		ss = append(ss, src.String())
+	}
+	b.WriteString(strings.Join(ss, ","))
+	return b.String()
+}
+
+// CallbackRequestMessage message sent from the client to the server, requesting another client to call back - e.g.
+// connect to the requesting client. The message is sent by a client that has a high ID who wishes to connect to a low ID client.
+type CallbackRequestMessage struct {
+	message
+	ClientID uint32
+}
+
+// Encode encodes the message to binary data.
+func (m *CallbackRequestMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageCallbackRequest)
+	binary.Write(buf, binary.LittleEndian, m.ClientID)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *CallbackRequestMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+5 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageCallbackRequest {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	pos++
+
+	m.ClientID = binary.LittleEndian.Uint32(data[pos : pos+4])
+	return
+}
+
+// Type is the message type
+func (m CallbackRequestMessage) Type() uint8 {
+	return MessageCallbackRequest
+}
+
+func (m CallbackRequestMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[callback-request]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\nclient:\n")
+	b.WriteString(ClientID(m.ClientID).String())
+	return b.String()
+}
+
+// CallbackRequestedMessage message sent from the server to the client indicating another client asks the receiving client
+// to connect to it. The message is sent when the receiving client has a low ID.
+// The receiving client tries to connect to the IP and port specified by the callback request packet.
+type CallbackRequestedMessage struct {
+	message
+	IP   uint32
+	Port uint16
+}
+
+// Encode encodes the message to binary data.
+func (m *CallbackRequestedMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageCallbackRequested)
+	binary.Write(buf, binary.LittleEndian, m.IP)
+	binary.Write(buf, binary.LittleEndian, m.Port)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *CallbackRequestedMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+7 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageCallbackRequested {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	pos++
+
+	m.IP = binary.LittleEndian.Uint32(data[pos : pos+4])
+	pos += 4
+	m.Port = binary.BigEndian.Uint16(data[pos : pos+2])
+	return
+}
+
+// Type is the message type
+func (m CallbackRequestedMessage) Type() uint8 {
+	return MessageCallbackRequested
+}
+
+func (m CallbackRequestedMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[callback-requested]\n")
+	b.WriteString(m.Header.String())
+	b.WriteString("\nclient:\n")
+	fmt.Fprintf(&b, "%s:%d", ClientID(m.IP).String(), m.Port)
+	return b.String()
+}
+
+// CallbackFailedMessage message sent from the server to the client indicating that the client’s callback request has failed.
+type CallbackFailedMessage struct {
+	message
+}
+
+// Encode encodes the message to binary data.
+func (m *CallbackFailedMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageCallbackFailed)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *CallbackFailedMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+1 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageCallbackFailed {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	return
+}
+
+// Type is the message type
+func (m CallbackFailedMessage) Type() uint8 {
+	return MessageCallbackFailed
+}
+
+func (m CallbackFailedMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[callback-failed]\n")
+	b.WriteString(m.Header.String())
+	return b.String()
+}
+
+// RejectedMessage message sent from the server to the client indicating that the server rejected the last command sent by the client.
+type RejectedMessage struct {
+	message
+}
+
+// Encode encodes the message to binary data.
+func (m *RejectedMessage) Encode() (data []byte, err error) {
+	buf := new(bytes.Buffer)
+	if _, err = m.Header.WriteTo(buf); err != nil {
+		return
+	}
+	buf.WriteByte(MessageRejected)
+
+	data = buf.Bytes()
+	size := len(data) - HeaderLength
+	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
+	return
+}
+
+// Decode decodes the message from binary data.
+func (m *RejectedMessage) Decode(data []byte) (err error) {
+	header := Header{}
+	err = header.Decode(data)
+	if err != nil {
+		return
+	}
+	pos := HeaderLength
+	if len(data) < pos+int(header.Size) ||
+		len(data) < pos+1 {
+		return ErrShortBuffer
+	}
+	if data[5] != MessageRejected {
+		return ErrWrongMessageType
+	}
+	m.Header = header
+	return
+}
+
+// Type is the message type
+func (m RejectedMessage) Type() uint8 {
+	return MessageRejected
+}
+
+func (m RejectedMessage) String() string {
+	b := bytes.Buffer{}
+	b.WriteString("[rejected]\n")
+	b.WriteString(m.Header.String())
 	return b.String()
 }

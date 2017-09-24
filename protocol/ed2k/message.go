@@ -47,16 +47,22 @@ var (
 )
 
 var constructors = map[uint8]func() Message{
-	MessageLoginRequest:  func() Message { return &LoginMessage{} },
-	MessageServerMessage: func() Message { return &ServerMessage{} },
-	MessageIDChange:      func() Message { return &IDChangeMessage{} },
-	MessageOfferFiles:    func() Message { return &OfferFilesMessage{} },
-	MessageGetServerList: func() Message { return &GetServerListMessage{} },
-	MessageServerList:    func() Message { return &ServerListMessage{} },
-	MessageServerStatus:  func() Message { return &ServerStatusMessage{} },
-	MessageServerIdent:   func() Message { return &ServerIdentMessage{} },
-	MessageSearchRequest: func() Message { return &SearchRequestMessage{} },
-	MessageSearchResult:  func() Message { return &SearchResultMessage{} },
+	MessageLoginRequest:      func() Message { return &LoginMessage{} },
+	MessageServerMessage:     func() Message { return &ServerMessage{} },
+	MessageIDChange:          func() Message { return &IDChangeMessage{} },
+	MessageOfferFiles:        func() Message { return &OfferFilesMessage{} },
+	MessageGetServerList:     func() Message { return &GetServerListMessage{} },
+	MessageServerList:        func() Message { return &ServerListMessage{} },
+	MessageServerStatus:      func() Message { return &ServerStatusMessage{} },
+	MessageServerIdent:       func() Message { return &ServerIdentMessage{} },
+	MessageSearchRequest:     func() Message { return &SearchRequestMessage{} },
+	MessageSearchResult:      func() Message { return &SearchResultMessage{} },
+	MessageGetSources:        func() Message { return &GetSourcesMessage{} },
+	MessageFoundSources:      func() Message { return &FoundSourcesMessage{} },
+	MessageCallbackRequest:   func() Message { return &CallbackRequestMessage{} },
+	MessageCallbackRequested: func() Message { return &CallbackRequestedMessage{} },
+	MessageCallbackFailed:    func() Message { return &CallbackFailedMessage{} },
+	MessageRejected:          func() Message { return &RejectedMessage{} },
 }
 
 // UID is user ID, it is a 128 bit (16 byte) GUID.

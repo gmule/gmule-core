@@ -27,25 +27,25 @@ func TestReadTag(t *testing.T) {
 		{[]byte{TagInteger, 1, 0, 1}, nil},
 		{[]byte{TagInteger, 0, 0, 0, 0}, nil},
 		{[]byte{TagInteger, 0, 0, 0, 0, 0}, nil},
-		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0}, IntegerTag("", 0)},
-		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0, 0}, IntegerTag("", 0)},
+		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0}, Uint32Tag("", 0)},
+		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0, 0}, Uint32Tag("", 0)},
 		{[]byte{TagInteger, 1, 0, 1, 0}, nil},
 		{[]byte{TagInteger, 1, 0, 0, 0, 0, 0}, nil},
-		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}, IntegerTag(1, 0)},
-		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0, 0}, IntegerTag(1, 0)},
-		{[]byte{TagInteger, 1, 0, 'a', 0, 0, 0, 0}, IntegerTag(int('a'), 0)},
-		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0}, IntegerTag("", 1)},
-		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0, 0}, IntegerTag("", 1)},
-		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}, IntegerTag(1, 1)},
-		{[]byte{TagInteger, 1, 0, 'a', 1, 0, 0, 0}, IntegerTag(int('a'), 1)},
-		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0, 1}, IntegerTag(1, 1)},
+		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}, Uint32Tag(1, 0)},
+		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0, 0}, Uint32Tag(1, 0)},
+		{[]byte{TagInteger, 1, 0, 'a', 0, 0, 0, 0}, Uint32Tag(int('a'), 0)},
+		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0}, Uint32Tag("", 1)},
+		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0, 0}, Uint32Tag("", 1)},
+		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}, Uint32Tag(1, 1)},
+		{[]byte{TagInteger, 1, 0, 'a', 1, 0, 0, 0}, Uint32Tag(int('a'), 1)},
+		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0, 1}, Uint32Tag(1, 1)},
 		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c'}, nil},
 		{[]byte{TagInteger, 3, 0, 0, 0, 0, 0}, nil},
 		{[]byte{TagInteger, 3, 0, 'a', 0, 0, 0, 0}, nil},
 		{[]byte{TagInteger, 3, 0, 'a', 'b', 0, 0, 0, 0}, nil},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}, IntegerTag("abc", 0)},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}, IntegerTag("abc", 1)},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0, 1}, IntegerTag("abc", 1)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}, Uint32Tag("abc", 0)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}, Uint32Tag("abc", 1)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0, 1}, Uint32Tag("abc", 1)},
 
 		{[]byte{TagFloat}, nil},
 		{[]byte{TagFloat, 0}, nil},
@@ -204,23 +204,23 @@ func TestTagDecode(t *testing.T) {
 	}
 }
 
-func TestIntegerTagEncode(t *testing.T) {
+func TestUint32TagEncode(t *testing.T) {
 	testCases := []struct {
 		in  Tag
 		out []byte
 	}{
-		{IntegerTag(int32(1), 0), nil},
-		{IntegerTag(1.0, 0), nil},
-		{IntegerTag(0, 0), []byte{TagInteger, 1, 0, 0, 0, 0, 0, 0}},
-		{IntegerTag(1, 0), []byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}},
-		{IntegerTag(0, 1), []byte{TagInteger, 1, 0, 0, 1, 0, 0, 0}},
-		{IntegerTag(1, 1), []byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}},
-		{IntegerTag(1, -1), []byte{TagInteger, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF}},
-		{IntegerTag("", 0), []byte{TagInteger, 0, 0, 0, 0, 0, 0}},
-		{IntegerTag("", 1), []byte{TagInteger, 0, 0, 1, 0, 0, 0}},
-		{IntegerTag("abc", 0), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}},
-		{IntegerTag("abc", 1), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}},
-		{IntegerTag("abc", -1), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 0xFF, 0xFF, 0xFF, 0xFF}},
+		{Uint32Tag(int32(1), 0), nil},
+		{Uint32Tag(1.0, 0), nil},
+		{Uint32Tag(0, 0), []byte{TagInteger, 1, 0, 0, 0, 0, 0, 0}},
+		{Uint32Tag(1, 0), []byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}},
+		{Uint32Tag(0, 1), []byte{TagInteger, 1, 0, 0, 1, 0, 0, 0}},
+		{Uint32Tag(1, 1), []byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}},
+		{Uint32Tag(1, 0xFFFFFFFF), []byte{TagInteger, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF}},
+		{Uint32Tag("", 0), []byte{TagInteger, 0, 0, 0, 0, 0, 0}},
+		{Uint32Tag("", 1), []byte{TagInteger, 0, 0, 1, 0, 0, 0}},
+		{Uint32Tag("abc", 0), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}},
+		{Uint32Tag("abc", 1), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}},
+		{Uint32Tag("abc", 0xFFFFFFFF), []byte{TagInteger, 3, 0, 'a', 'b', 'c', 0xFF, 0xFF, 0xFF, 0xFF}},
 	}
 
 	for _, tc := range testCases {
@@ -234,21 +234,21 @@ func TestIntegerTagEncode(t *testing.T) {
 	}
 }
 
-func TestIntegerTagDecode(t *testing.T) {
+func TestUint32TagDecode(t *testing.T) {
 	testCases := []struct {
 		in  []byte
 		out Tag
 	}{
-		{[]byte{TagInteger, 1, 0, 0, 0, 0, 0, 0}, IntegerTag(0, 0)},
-		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}, IntegerTag(1, 0)},
-		{[]byte{TagInteger, 1, 0, 0, 1, 0, 0, 0}, IntegerTag(0, 1)},
-		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}, IntegerTag(1, 1)},
-		{[]byte{TagInteger, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF}, IntegerTag(1, -1)},
-		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0}, IntegerTag("", 0)},
-		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0}, IntegerTag("", 1)},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}, IntegerTag("abc", 0)},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}, IntegerTag("abc", 1)},
-		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0xFF, 0xFF, 0xFF, 0xFF}, IntegerTag("abc", -1)},
+		{[]byte{TagInteger, 1, 0, 0, 0, 0, 0, 0}, Uint32Tag(0, 0)},
+		{[]byte{TagInteger, 1, 0, 1, 0, 0, 0, 0}, Uint32Tag(1, 0)},
+		{[]byte{TagInteger, 1, 0, 0, 1, 0, 0, 0}, Uint32Tag(0, 1)},
+		{[]byte{TagInteger, 1, 0, 1, 1, 0, 0, 0}, Uint32Tag(1, 1)},
+		{[]byte{TagInteger, 1, 0, 1, 0xFF, 0xFF, 0xFF, 0xFF}, Uint32Tag(1, 0xFFFFFFFF)},
+		{[]byte{TagInteger, 0, 0, 0, 0, 0, 0}, Uint32Tag("", 0)},
+		{[]byte{TagInteger, 0, 0, 1, 0, 0, 0}, Uint32Tag("", 1)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0, 0, 0, 0}, Uint32Tag("abc", 0)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 1, 0, 0, 0}, Uint32Tag("abc", 1)},
+		{[]byte{TagInteger, 3, 0, 'a', 'b', 'c', 0xFF, 0xFF, 0xFF, 0xFF}, Uint32Tag("abc", 0xFFFFFFFF)},
 	}
 
 	for _, tc := range testCases {
