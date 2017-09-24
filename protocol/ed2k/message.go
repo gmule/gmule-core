@@ -11,11 +11,9 @@ import (
 	"github.com/satori/go.uuid"
 )
 
-// Message IDs
+// Client-Server TCP messages.
 const (
-	MessageNull = 0x00
-
-	// Client-Server TCP Messages
+	MessageNull              = 0x00
 	MessageLoginRequest      = 0x01
 	MessageRejected          = 0x05
 	MessageGetServerList     = 0x14
@@ -40,30 +38,43 @@ const (
 	MessageFoundSourcesOBFU  = 0x44
 )
 
+// Client-Client TCP messages.
+const (
+	MessageHello       = 0x01
+	MessageHelloAnswer = 0x02
+)
+
 // errors
 var (
 	ErrShortBuffer      = io.ErrShortBuffer
 	ErrWrongMessageType = errors.New("wrong message type")
 )
 
-var constructors = map[uint8]func() Message{
-	MessageLoginRequest:      func() Message { return &LoginMessage{} },
-	MessageServerMessage:     func() Message { return &ServerMessage{} },
-	MessageIDChange:          func() Message { return &IDChangeMessage{} },
-	MessageOfferFiles:        func() Message { return &OfferFilesMessage{} },
-	MessageGetServerList:     func() Message { return &GetServerListMessage{} },
-	MessageServerList:        func() Message { return &ServerListMessage{} },
-	MessageServerStatus:      func() Message { return &ServerStatusMessage{} },
-	MessageServerIdent:       func() Message { return &ServerIdentMessage{} },
-	MessageSearchRequest:     func() Message { return &SearchRequestMessage{} },
-	MessageSearchResult:      func() Message { return &SearchResultMessage{} },
-	MessageGetSources:        func() Message { return &GetSourcesMessage{} },
-	MessageFoundSources:      func() Message { return &FoundSourcesMessage{} },
-	MessageCallbackRequest:   func() Message { return &CallbackRequestMessage{} },
-	MessageCallbackRequested: func() Message { return &CallbackRequestedMessage{} },
-	MessageCallbackFailed:    func() Message { return &CallbackFailedMessage{} },
-	MessageRejected:          func() Message { return &RejectedMessage{} },
-}
+var (
+	mCSTCPMessages = map[uint8]func() Message{
+		MessageLoginRequest:      func() Message { return &LoginMessage{} },
+		MessageServerMessage:     func() Message { return &ServerMessage{} },
+		MessageIDChange:          func() Message { return &IDChangeMessage{} },
+		MessageOfferFiles:        func() Message { return &OfferFilesMessage{} },
+		MessageGetServerList:     func() Message { return &GetServerListMessage{} },
+		MessageServerList:        func() Message { return &ServerListMessage{} },
+		MessageServerStatus:      func() Message { return &ServerStatusMessage{} },
+		MessageServerIdent:       func() Message { return &ServerIdentMessage{} },
+		MessageSearchRequest:     func() Message { return &SearchRequestMessage{} },
+		MessageSearchResult:      func() Message { return &SearchResultMessage{} },
+		MessageGetSources:        func() Message { return &GetSourcesMessage{} },
+		MessageFoundSources:      func() Message { return &FoundSourcesMessage{} },
+		MessageCallbackRequest:   func() Message { return &CallbackRequestMessage{} },
+		MessageCallbackRequested: func() Message { return &CallbackRequestedMessage{} },
+		MessageCallbackFailed:    func() Message { return &CallbackFailedMessage{} },
+		MessageRejected:          func() Message { return &RejectedMessage{} },
+	}
+
+	mCCTCPMessages = map[uint8]func() Message{
+		MessageHello:       func() Message { return &HelloMessage{} },
+		MessageHelloAnswer: func() Message { return &HelloAnswerMessage{} },
+	}
+)
 
 // UID is user ID, it is a 128 bit (16 byte) GUID.
 // the 6th and 15th (start from 1st) bytes values are 14 and 111 respectively.
@@ -166,40 +177,61 @@ func (m NullMessage) String() string {
 	return b.String()
 }
 
+// message classes.
+const (
+	CSTCPMessage = 0x00 // client-server TCP message
+	CSUDPMessage = 0x01 // client-server UDP message
+	CCTCPMessage = 0x02 // client-client TCP message
+	CCUDPMessage = 0x03 // client-client UDP message
+)
+
 // ReadMessage reads structured binary data from r and parses the data to message.
-func ReadMessage(r io.Reader) (m Message, err error) {
-	data := make([]byte, 256)
-	// read header
-	if _, err = io.ReadFull(r, data[:HeaderLength]); err != nil {
-		return
-	}
-	header := Header{}
-	if err = header.Decode(data[:HeaderLength]); err != nil {
-		return
+func ReadMessage(r io.Reader, class int) (m Message, err error) {
+	switch class {
+	case CSTCPMessage, CCTCPMessage:
+		data := make([]byte, 256)
+		// read header
+		if _, err = io.ReadFull(r, data[:HeaderLength]); err != nil {
+			return
+		}
+		header := Header{}
+		if err = header.Decode(data[:HeaderLength]); err != nil {
+			return
+		}
+
+		if header.Size == 0 {
+			return &NullMessage{message: message{Header: header}}, nil
+		}
+
+		mSize := HeaderLength + int(header.Size)
+		if len(data) < mSize {
+			b := data
+			data = make([]byte, mSize)
+			copy(data[:], b[:HeaderLength])
+		}
+		if _, err = io.ReadFull(r, data[HeaderLength:mSize]); err != nil {
+			return
+		}
+
+		var fn func() Message
+		var ok bool
+		mType := data[5]
+		if class == CSTCPMessage {
+			fn, ok = mCSTCPMessages[mType]
+		} else {
+			fn, ok = mCCTCPMessages[mType]
+		}
+		if !ok {
+			err = fmt.Errorf("unknown message type: %v", mType)
+			return
+		}
+		m = fn()
+		err = m.Decode(data)
+	case CSUDPMessage:
+	case CCUDPMessage:
+	default:
+		err = errors.New("unknown message class")
 	}
 
-	if header.Size == 0 {
-		return &NullMessage{message: message{Header: header}}, nil
-	}
-
-	mSize := HeaderLength + int(header.Size)
-	if len(data) < mSize {
-		b := data
-		data = make([]byte, mSize)
-		copy(data[:], b[:HeaderLength])
-	}
-	if _, err = io.ReadFull(r, data[HeaderLength:mSize]); err != nil {
-		return
-	}
-
-	mType := data[5]
-	fn, ok := constructors[mType]
-	if !ok {
-		err = fmt.Errorf("unknown message type: %v", mType)
-		return
-	}
-
-	m = fn()
-	err = m.Decode(data)
 	return
 }

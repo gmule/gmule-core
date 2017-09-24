@@ -14,7 +14,7 @@ import (
 type LoginMessage struct {
 	message
 	UID      UID
-	ClientID uint32
+	ClientID ClientID
 	// The TCP port used by the client, configurable.
 	Port uint16
 	Tags []Tag
@@ -43,7 +43,6 @@ func (m *LoginMessage) Encode() (data []byte, err error) {
 	}
 
 	data = buf.Bytes()
-
 	size := len(data) - HeaderLength
 	binary.LittleEndian.PutUint32(data[1:5], uint32(size)) // message size
 
@@ -70,7 +69,7 @@ func (m *LoginMessage) Decode(data []byte) (err error) {
 	copy(m.UID[:], data[pos:pos+16])
 
 	pos += 16
-	m.ClientID = binary.LittleEndian.Uint32(data[pos : pos+4])
+	m.ClientID = ClientID(binary.LittleEndian.Uint32(data[pos : pos+4]))
 
 	pos += 4
 	m.Port = binary.LittleEndian.Uint16(data[pos : pos+2])
@@ -90,7 +89,7 @@ func (m *LoginMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m LoginMessage) Type() uint8 {
 	return MessageLoginRequest
 }
@@ -100,7 +99,7 @@ func (m LoginMessage) String() string {
 	b.WriteString("[login]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
-	fmt.Fprintf(&b, "uid: %s, clientID: %#x(%s), port: %d\n", m.UID, m.ClientID, ClientID(m.ClientID).String(), m.Port)
+	fmt.Fprintf(&b, "uid: %s, %s:%d\n", m.UID, m.ClientID.String(), m.Port)
 	for i, tag := range m.Tags {
 		fmt.Fprintf(&b, "tag%d - %v: %v\n", i, tag.Name(), tag.Value())
 	}
@@ -165,7 +164,7 @@ func (m *ServerMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m ServerMessage) Type() uint8 {
 	return MessageServerMessage
 }
@@ -183,7 +182,7 @@ func (m ServerMessage) String() string {
 // signifies that the server has accepted the client connection.
 type IDChangeMessage struct {
 	message
-	ClientID uint32
+	ClientID ClientID
 	// Currently only 1 bit (the LSB) has meaning, setting it to 1 signals that the server supports compression.
 	Bitmap uint32
 }
@@ -226,14 +225,14 @@ func (m *IDChangeMessage) Decode(data []byte) (err error) {
 	}
 	m.Header = header
 	pos++
-	m.ClientID = binary.LittleEndian.Uint32(data[pos : pos+4])
+	m.ClientID = ClientID(binary.LittleEndian.Uint32(data[pos : pos+4]))
 	pos += 4
 	m.Bitmap = binary.LittleEndian.Uint32(data[pos : pos+4])
 
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m IDChangeMessage) Type() uint8 {
 	return MessageIDChange
 }
@@ -243,7 +242,7 @@ func (m IDChangeMessage) String() string {
 	b.WriteString("[id-change]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
-	fmt.Fprintf(&b, "clientID: %#x(%s), bitmap: %#x", m.ClientID, ClientID(m.ClientID).String(), m.Bitmap)
+	fmt.Fprintf(&b, "clientID: %#X(%s), bitmap: %#x", uint32(m.ClientID), ClientID(m.ClientID).String(), m.Bitmap)
 	return b.String()
 }
 
@@ -312,7 +311,7 @@ func (m *OfferFilesMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m OfferFilesMessage) Type() uint8 {
 	return MessageOfferFiles
 }
@@ -376,7 +375,7 @@ func (m *GetServerListMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m GetServerListMessage) Type() uint8 {
 	return MessageGetServerList
 }
@@ -461,7 +460,7 @@ func (m *ServerListMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m ServerListMessage) Type() uint8 {
 	return MessageServerList
 }
@@ -536,7 +535,7 @@ func (m *ServerStatusMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m ServerStatusMessage) Type() uint8 {
 	return MessageServerStatus
 }
@@ -556,7 +555,7 @@ func (m ServerStatusMessage) String() string {
 type ServerIdentMessage struct {
 	message
 	// A GUID of the server (seems to be used for debug).
-	Hash [16]byte
+	Hash UID
 	// The IP address of the server.
 	IP uint32
 	// The TCP port on which the server listens.
@@ -628,7 +627,7 @@ func (m *ServerIdentMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m ServerIdentMessage) Type() uint8 {
 	return MessageServerIdent
 }
@@ -638,7 +637,7 @@ func (m ServerIdentMessage) String() string {
 	b.WriteString("[server-ident]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\n")
-	fmt.Fprintf(&b, "addr: %s:%d, hash: %X\n",
+	fmt.Fprintf(&b, "addr: %s:%d, hash: %s\n",
 		ClientID(m.IP).String(), m.Port, m.Hash)
 	for i, tag := range m.Tags {
 		fmt.Fprintf(&b, "tag%d - %v: %v\n", i, tag.Name(), tag.Value())
@@ -681,7 +680,7 @@ func (m *SearchRequestMessage) Decode(data []byte) (err error) {
 	return nil
 }
 
-// Type is the message type
+// Type is the message type.
 func (m *SearchRequestMessage) Type() uint8 {
 	return MessageSearchRequest
 }
@@ -753,7 +752,7 @@ func (m *SearchResultMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m SearchResultMessage) Type() uint8 {
 	return MessageSearchResult
 }
@@ -821,7 +820,7 @@ func (m *GetSourcesMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m GetSourcesMessage) Type() uint8 {
 	return MessageGetSources
 }
@@ -908,7 +907,7 @@ func (m *FoundSourcesMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m FoundSourcesMessage) Type() uint8 {
 	return MessageFoundSources
 }
@@ -930,7 +929,7 @@ func (m FoundSourcesMessage) String() string {
 // connect to the requesting client. The message is sent by a client that has a high ID who wishes to connect to a low ID client.
 type CallbackRequestMessage struct {
 	message
-	ClientID uint32
+	ClientID ClientID
 }
 
 // Encode encodes the message to binary data.
@@ -966,11 +965,11 @@ func (m *CallbackRequestMessage) Decode(data []byte) (err error) {
 	m.Header = header
 	pos++
 
-	m.ClientID = binary.LittleEndian.Uint32(data[pos : pos+4])
+	m.ClientID = ClientID(binary.LittleEndian.Uint32(data[pos : pos+4]))
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m CallbackRequestMessage) Type() uint8 {
 	return MessageCallbackRequest
 }
@@ -980,7 +979,7 @@ func (m CallbackRequestMessage) String() string {
 	b.WriteString("[callback-request]\n")
 	b.WriteString(m.Header.String())
 	b.WriteString("\nclient:\n")
-	b.WriteString(ClientID(m.ClientID).String())
+	b.WriteString(m.ClientID.String())
 	return b.String()
 }
 
@@ -1033,7 +1032,7 @@ func (m *CallbackRequestedMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m CallbackRequestedMessage) Type() uint8 {
 	return MessageCallbackRequested
 }
@@ -1085,7 +1084,7 @@ func (m *CallbackFailedMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m CallbackFailedMessage) Type() uint8 {
 	return MessageCallbackFailed
 }
@@ -1135,7 +1134,7 @@ func (m *RejectedMessage) Decode(data []byte) (err error) {
 	return
 }
 
-// Type is the message type
+// Type is the message type.
 func (m RejectedMessage) Type() uint8 {
 	return MessageRejected
 }
